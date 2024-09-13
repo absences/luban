@@ -18,7 +18,6 @@ namespace Luban.DataExporter.Builtin.Csv
 
         public override OutputFile ExportTable(DefTable table, List<Record> records)
         {
-            //test
             StringBuilder sb = new StringBuilder();
 
             var fileds = records[0].Data.TType.DefBean.Fields;
@@ -33,24 +32,22 @@ namespace Luban.DataExporter.Builtin.Csv
                     sb.Append(field.Name);
                     sb.Append(',');
 
-                    if(field.CType is TArray array)
+                    if (field.CType is TArray array)
                     {
-                      
-                        if (array.ElementType is TInt)
+                        switch (array.ElementType)
                         {
-                            sb.Append("ints");
+                            case TInt:
+                                sb.Append("ints");
+                                break;
+                            case TLong:
+                                sb.Append("longs");
+                                break;
+                            case TBean:
+                                sb.Append("json_funcs");
+                                break;
                         }
-                        else if (array.ElementType is TLong)
-                        {
-                            sb.Append("longs");
-                        }
-                        else if(array.ElementType is TBean)
-                        {
-                            sb.Append("json_funcs");
-                        }
-                        
                     }
-                    else if(field.CType is TMap map)
+                    else if (field.CType is TMap map)
                     {
                         sb.Append(string.Format("json_{0}map", map.KeyType.TypeName));
                     }
@@ -58,8 +55,7 @@ namespace Luban.DataExporter.Builtin.Csv
                     {
                         sb.Append(field.Type);
                     }
-                    //Console.WriteLine(field.CType);//类型映射
-                    
+
                     sb.Append('}');
                     sb.Append('"');
                     sb.Append(',');
@@ -84,7 +80,7 @@ namespace Luban.DataExporter.Builtin.Csv
                     {
                         continue;
                     }
-                        
+
                     if (dType is DArray array)
                     {
                         sb.Append('"');
@@ -94,21 +90,19 @@ namespace Luban.DataExporter.Builtin.Csv
                         {
                             if (i == 0)
                             {
-                                if(array.Datas[i] is DInt)
+                                switch (array.Datas[i])
                                 {
-                                    sb.Append('{');
-                                }
-                                else if (array.Datas[i] is DLong)
-                                {
-                                    sb.Append('{');
-                                }
-                                else if(array.Datas[i] is DBean)
-                                {
-                                    sb.Append('[');
+                                    case DInt:
+                                    case DLong:
+                                        sb.Append('{');
+                                        break;
+                                    case DBean:
+                                        sb.Append('[');
+                                        break;
                                 }
                             }
 
-                            if(array.Datas[i] is DBean type)
+                            if (array.Datas[i] is DBean type)
                             {
                                 //if (type.Type.IsAbstractType)
                                 //{
@@ -139,20 +133,18 @@ namespace Luban.DataExporter.Builtin.Csv
                                     {
                                         sb.Append("null");
                                     }
-                                    if(j!=c-1)
+                                    if (j != c - 1)
                                     {
                                         sb.Append(',');
                                     }
-                                       
+
                                 }
                                 sb.Append('}');
                             }
                             else
                             {
-
                                 sb.Append(array.Datas[i].ToString());
                             }
-
 
                             if (i != (count - 1))
                             {
@@ -161,24 +153,22 @@ namespace Luban.DataExporter.Builtin.Csv
 
                             if (i == count - 1)
                             {
-                                if (array.Datas[i] is DInt)
+                                switch (array.Datas[i])
                                 {
-                                    sb.Append('}');
-                                }
-                                else if (array.Datas[i] is DLong)
-                                {
-                                    sb.Append('}');
-                                }
-                                else if (array.Datas[i] is DBean)
-                                {
-                                    sb.Append(']');
+                                    case DInt:
+                                    case DLong:
+                                        sb.Append('}');
+                                        break;
+                                    case DBean:
+                                        sb.Append(']');
+                                        break;
                                 }
                             }
-                        } 
+                        }
 
                         sb.Append('"');
                     }
-                    else if(dType is DMap map)
+                    else if (dType is DMap map)
                     {
                         sb.Append('{');
                         var count = map.Datas.Count;
@@ -199,9 +189,9 @@ namespace Luban.DataExporter.Builtin.Csv
 
                         sb.Append('}');
                     }
-                    else if(dType is DString)
+                    else if (dType is DString)
                     {
-                        sb.Append(dType.ToString().Replace("\\","\""));
+                        sb.Append(dType.ToString().Replace("\\", "\""));
                     }
                     else
                     {
