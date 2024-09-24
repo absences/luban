@@ -1,6 +1,4 @@
-using Cysharp.Threading.Tasks;
 using Luban;
-using System;
 
 {{namespace_with_grace_begin __namespace}}
 public partial class {{__name}}
@@ -11,13 +9,13 @@ public partial class {{__name}}
     /// {{escape_comment table.comment}}
     /// </summary>
 {{~end~}}
-    public {{table.full_name}} {{format_property_name __code_style table.name}} {get; private set; }
+    public {{table.full_name}} {{format_property_name __code_style table.name}} {get; }
     {{~end~}}
 
-    public async UniTask Init(System.Func<string, UniTask<ByteBuf>> loader)
+    public {{__name}}(System.Func<string, ByteBuf> loader)
     {
         {{~for table in __tables ~}}
-        {{format_property_name __code_style table.name}} = new {{table.full_name}}(await loader("{{table.output_data_file}}"));
+        {{format_property_name __code_style table.name}} = new {{table.full_name}}(loader("{{table.output_data_file}}"));
         {{~end~}}
         ResolveRef();
     }
