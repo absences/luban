@@ -9,9 +9,11 @@ public partial class {{__name}}
     /// {{escape_comment table.comment}}
     /// </summary>
 {{~end~}}
-    public {{table.full_name}} {{format_property_name __code_style table.name}} {get; }
+    private {{table.full_name}} {{format_property_name __code_style table.name}} {get; }
     {{~end~}}
 
+    public System.Collections.Generic.Dictionary<System.Type, System.Collections.Generic.Dictionary<int, BeanBase>> allTypesCfg = new();
+    public System.Collections.Generic.Dictionary<System.Type, BeanBase> instanceCfg = new();
     public {{__name}}(System.Func<string, ByteBuf> loader)
     {
         {{~for table in __tables ~}}
@@ -25,6 +27,32 @@ public partial class {{__name}}
         {{~for table in __tables ~}}
         {{format_property_name __code_style table.name}}.ResolveRef(this);
         {{~end~}}
+    }
+
+    public T Get<T>(int? id = null) where T : BeanBase
+    {
+        var type = typeof(T);
+
+        if (id != null)
+        {
+            if (allTypesCfg.TryGetValue(type, out var cfgDic))
+                if (cfgDic.TryGetValue((int)id, out BeanBase cfgObj))
+                    return cfgObj as T;
+        }
+        else
+        {
+            if (instanceCfg.TryGetValue(type, out BeanBase cfgObj))
+                return cfgObj as T;
+        }
+        Logger.LogWarning(string.Format("can't find {0} config with id {1}", type.FullName, id));
+        return null;
+    }
+    public System.Collections.Generic.Dictionary<int, BeanBase> GetAll<T>() where T : BeanBase
+    {
+        var type = typeof(T);
+        if (allTypesCfg.TryGetValue(type, out var dic))
+            return dic;
+        return null;
     }
 }
 
