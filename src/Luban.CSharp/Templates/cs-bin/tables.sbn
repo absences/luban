@@ -9,7 +9,7 @@ public partial class {{__name}}
     /// {{escape_comment table.comment}}
     /// </summary>
 {{~end~}}
-    internal {{table.full_name}} {{format_property_name __code_style table.name}} {get; }
+    public {{table.full_name}} {{format_property_name __code_style table.name}} { get; }
     {{~end~}}
 
     public System.Collections.Generic.Dictionary<System.Type, System.Collections.Generic.Dictionary<int, BeanBase>> allTypesCfg = new();

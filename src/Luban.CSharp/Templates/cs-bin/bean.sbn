@@ -27,7 +27,7 @@ func generate_resolve_field_ref
     if can_generate_ref field
         tableName = format_property_name __code_style refTable.name
         if field.is_nullable
-            ret (get_ref_name field) + ' = ' + fieldName + '!= null ? tables.' + tableName + '.GetOrDefault(' + (get_value_of_nullable_type field.ctype fieldName) + ') : null;'
+            ret (get_ref_name field) + ' = ' + fieldName + ' != null ? tables.' + tableName + '.GetOrDefault(' + (get_value_of_nullable_type field.ctype fieldName) + ') : null;'
         else
             ret (get_ref_name field) + ' = tables.' + tableName + '.GetOrDefault(' + fieldName + ');'
         end
