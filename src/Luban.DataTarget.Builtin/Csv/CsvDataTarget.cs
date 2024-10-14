@@ -211,7 +211,7 @@ namespace Luban.DataExporter.Builtin.Csv
 
             Buffer.BlockCopy(bytes, 0, content, 3, bytes.Length);
 
-            CreateOutputFile($"{table.OutputDataFile}.{OutputFileExt}", Encoding.UTF8.GetString(content));
+            return CreateOutputFile($"{table.OutputDataFile}.{OutputFileExt}", Encoding.UTF8.GetString(content));
         }
     }
 }
