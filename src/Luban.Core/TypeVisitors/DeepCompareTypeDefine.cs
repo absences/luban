@@ -28,6 +28,10 @@ class DeepCompareTypeDefine : ITypeFuncVisitor<TType, Dictionary<DefTypeBase, bo
         {
             return false;
         }
+        if (a.JsonHead != b.JsonHead)
+        {
+            return false;
+        }
         if (a.IsMultiRow != b.IsMultiRow)
         {
             return false;

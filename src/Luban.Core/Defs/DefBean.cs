@@ -43,6 +43,7 @@ public class DefBean : DefTypeBase
     public List<DefField> Fields { get; } = new();
 
     public string Alias { get; }
+    public string JsonHead { get; }
 
     public bool IsMultiRow { get; set; }
 
@@ -90,6 +91,7 @@ public class DefBean : DefTypeBase
             Fields.Add(CreateField(field, 0));
         }
         Alias = b.Alias;
+        JsonHead = b.JsonHead;
         Sep = b.Sep;
         IsValueType = b.IsValueType;
         Groups = b.Groups;

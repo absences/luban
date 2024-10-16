@@ -229,6 +229,7 @@ public class XmlSchemaLoader : SchemaLoaderBase
             Parent = parent,
             IsValueType = XmlUtil.GetOptionBoolAttribute(e, "valueType"),
             Alias = XmlUtil.GetOptionalAttribute(e, "alias"),
+            JsonHead = XmlUtil.GetOptionalAttribute(e, "json_head"),
             Sep = XmlUtil.GetOptionalAttribute(e, "sep"),
             Comment = XmlUtil.GetOptionalAttribute(e, "comment"),
             Tags = DefUtil.ParseAttrs(XmlUtil.GetOptionalAttribute(e, "tags")),

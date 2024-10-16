@@ -42,14 +42,45 @@ namespace Luban.DataExporter.Builtin.Csv
                             case TLong:
                                 sb.Append("longs");
                                 break;
-                            case TBean:
-                                sb.Append("json_funcs");
-                                break;
+                            case TBean bean:
+                            {
+                                var def = bean.DefBean;
+
+                                sb.Append(def.JsonHead + "Ary");
+                            }
+                            break;
                         }
                     }
+                    else if (field.CType is TList list)
+                    {
+                        switch (list.ElementType)
+                        {
+                            case TInt:
+                                sb.Append("ints");
+                                break;
+                            case TLong:
+                                sb.Append("longs");
+                                break;
+                            case TBean bean:
+                            {
+                                var def = bean.DefBean;
+
+                                sb.Append(def.JsonHead + "s");
+                            }
+                            break;
+                        }
+                    }
+
                     else if (field.CType is TMap map)
                     {
+                    
                         sb.Append(string.Format("json_{0}map", map.KeyType.TypeName));
+                    }
+                    else if (field.CType is TBean bean1)
+                    {
+                        var def = bean1.DefBean;
+
+                        sb.Append(def.JsonHead );
                     }
                     else
                     {
@@ -154,6 +185,88 @@ namespace Luban.DataExporter.Builtin.Csv
                             if (i == count - 1)
                             {
                                 switch (array.Datas[i])
+                                {
+                                    case DInt:
+                                    case DLong:
+                                        sb.Append('}');
+                                        break;
+                                    case DBean:
+                                        sb.Append(']');
+                                        break;
+                                }
+                            }
+                        }
+
+                        sb.Append('"');
+                    }
+                    else if (dType is DList list)
+                    {
+                        sb.Append('"');
+
+                        var count = list.Datas.Count;
+                        for (int i = 0; i < count; i++)
+                        {
+                            if (i == 0)
+                            {
+                                switch (list.Datas[i])
+                                {
+                                    case DInt:
+                                    case DLong:
+                                        sb.Append('{');
+                                        break;
+                                    case DBean:
+                                        sb.Append('[');
+                                        break;
+                                }
+                            }
+
+                            if (list.Datas[i] is DBean type)
+                            {
+
+                                sb.Append('{');
+                                
+
+                                var c = type.Fields.Count;
+
+                                for (int j = 0; j < c; j++)
+                                {
+                                    var hf = type.ImplType.HierarchyFields[j];
+                                    sb.Append('"');
+                                    sb.Append('"');
+                                    sb.Append(hf.Name);
+                                    sb.Append('"');
+                                    sb.Append('"');
+                                    sb.Append(':');
+                                    var f = type.Fields[j];
+                                    if (f != null)
+                                    {
+                                        sb.Append(f.ToString());
+                                    }
+                                    else
+                                    {
+                                        sb.Append("null");
+                                    }
+                                    if (j != c - 1)
+                                    {
+                                        sb.Append(',');
+                                    }
+
+                                }
+                                sb.Append('}');
+                            }
+                            else
+                            {
+                                sb.Append(list.Datas[i].ToString());
+                            }
+
+                            if (i != (count - 1))
+                            {
+                                sb.Append(',');
+                            }
+
+                            if (i == count - 1)
+                            {
+                                switch (list.Datas[i])
                                 {
                                     case DInt:
                                     case DLong:

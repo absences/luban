@@ -18,6 +18,8 @@ public class RawBean
 
     public string Alias { get; set; }
 
+    public string JsonHead { get; set; }
+
     public string Sep { get; set; }
 
     public List<string> Groups { get; set; }
