@@ -44,7 +44,7 @@ public partial class {{__name}}
             if (instanceCfg.TryGetValue(type, out BeanBase cfgObj))
                 return cfgObj as T;
         }
-        Logger.LogWarning(string.Format("can't find {0} config with id {1}", type.FullName, id));
+        GLogger.LogWarning(string.Format("can't find {0} config with id {1}", type.FullName, id));
         return null;
     }
     public System.Collections.Generic.Dictionary<int, BeanBase> GetAll<T>() where T : BeanBase
