@@ -67,8 +67,9 @@ public partial class {{__name}}
 
     public void ResolveRef({{__manager_name}} tables)
     {
-        tables.allTypesCfg.Add(typeof({{declaring_type_name value_type}}), _dataMap);
-
+        {{~if declaring_type_is_int key_type~}}
+            tables.allTypesCfg.Add(typeof({{declaring_type_name value_type}}), _dataMap);
+        {{~end~}}
         foreach(var _v in _dataMap)
         {
             (_v.Value as {{declaring_type_name value_type}}).ResolveRef(tables);

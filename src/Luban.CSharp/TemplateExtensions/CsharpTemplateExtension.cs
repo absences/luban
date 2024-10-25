@@ -1,5 +1,6 @@
 using Luban.CodeFormat;
 using Luban.CSharp.TypeVisitors;
+using Luban.Datas;
 using Luban.Defs;
 using Luban.Types;
 using Luban.Utils;
@@ -13,6 +14,12 @@ public class CsharpTemplateExtension : ScriptObject
     {
         return type.Apply(DeclaringTypeNameVisitor.Ins);
     }
+
+    public static bool DeclaringTypeIsInt(TType type)
+    {
+        return type is TInt;
+    }
+
 
     public static string DeclaringCollectionRefName(TType type)
     {
