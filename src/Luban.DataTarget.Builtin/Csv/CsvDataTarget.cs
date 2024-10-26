@@ -29,7 +29,10 @@ namespace Luban.DataExporter.Builtin.Csv
                     sb.Append('"');
                     sb.Append(field.Comment);
                     sb.Append('{');
-                    sb.Append(field.Name.ToLower());
+
+                    sb.Append(field.Name.Substring(0, 1).ToLower());//首字母小写
+                    sb.Append(field.Name.Substring(1));
+
                     sb.Append(',');
 
                     if (field.CType is TArray array)
@@ -81,6 +84,10 @@ namespace Luban.DataExporter.Builtin.Csv
                         var def = bean1.DefBean;
 
                         sb.Append(def.JsonHead );
+                    }
+                    else if (field.CType is TEnum)
+                    {
+                        sb.Append("str");
                     }
                     else
                     {
@@ -305,6 +312,10 @@ namespace Luban.DataExporter.Builtin.Csv
                     else if (dType is DString)
                     {
                         sb.Append(dType.ToString().Replace("\\", "\""));
+                    }
+                    else if (dType is DEnum _enum)
+                    {
+                        sb.Append(_enum.StrValue);
                     }
                     else
                     {
