@@ -13,9 +13,9 @@ public class TextValidator : DataValidatorBase
 
     public override void Compile(DefField field, TType type)
     {
-        if (type is not TString)
+        if (type is not TInt)
         {
-            throw new Exception($"field:{field} text validator supports string type only");
+            throw new Exception($"field:{field} text validator supports int type only");
         }
     }
 
