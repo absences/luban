@@ -29,7 +29,7 @@ namespace Luban.DataExporter.Builtin.Csv
                     sb.Append('"');
                     sb.Append(field.Comment);
                     sb.Append('{');
-                    sb.Append(field.Name);
+                    sb.Append(field.Name.ToLower());
                     sb.Append(',');
 
                     if (field.CType is TArray array)
