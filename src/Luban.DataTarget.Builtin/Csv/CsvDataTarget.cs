@@ -3,7 +3,9 @@ using Luban.DataTarget;
 using Luban.Defs;
 using Luban.Types;
 using Luban.Utils;
+using System.Collections.Generic;
 using System.Text;
+using System.Text.Json;
 
 namespace Luban.DataExporter.Builtin.Csv
 {
@@ -16,12 +18,250 @@ namespace Luban.DataExporter.Builtin.Csv
     {
         protected override string DefaultOutputFileExt => "csv";
 
+        public class CsvSet
+        {
+            public string headType { get; set; }
+            public string dataType { get; set; }
+        }
+
+        public string GetHeadType(string set)
+        {
+            var s = JsonSerializer.Deserialize<CsvSet>(set);
+            return s.headType;
+        }
+
+        public string GetDataType(string set)
+        {
+            var s = JsonSerializer.Deserialize<CsvSet>(set);
+            return s.dataType;
+        }
+
+        void WriteBean(StringBuilder sb, DBean type)
+        {
+            sb.Append('{');
+
+            var count = type.Fields.Count;
+
+            for (int i = 0; i < count; i++)
+            {
+                var field = type.ImplType.HierarchyFields[i];
+
+                if (field.NeedExport())
+                {
+                    sb.Append('"');
+                    sb.Append('"');
+                    sb.Append(field.Name);
+                    sb.Append('"');
+                    sb.Append('"');
+                    sb.Append(':');
+
+                    var f = type.Fields[i];
+                    if (f != null)
+                    {
+                        WriteFieldData(sb, f, false);
+                    }
+                    else
+                    {
+                        sb.Append("null");
+                    }
+
+                }
+
+                if (i != count - 1)
+                {
+                    sb.Append(',');
+                }
+            }
+            sb.Append('}');
+        }
+
+        public void WriteCollectionHead(StringBuilder sb, TType elementType, bool array)
+        {
+            switch (elementType)
+            {
+                case TInt:
+                    sb.Append("ints");
+                    break;
+                case TLong:
+                    sb.Append("longs");
+                    break;
+                case TBean bean:
+                {
+                    var def = bean.DefBean;
+
+                    sb.Append(GetHeadType(def.CsvSet) + (array ? "Ary" : "s"));
+                }
+                break;
+            }
+        }
+
+        /// <summary>
+        /// 写入容器数据
+        /// </summary>
+        /// <param name="sb"></param>
+        /// <param name="type"></param>
+        public void WriteCollectionData(StringBuilder sb, DType type)
+        {
+            sb.Append('"');
+            List<DType> Dlist = null;
+
+            if (type is DList list)
+            {
+                Dlist = list.Datas;
+            }
+            else if (type is DArray array)
+            {
+                Dlist = array.Datas;
+            }
+
+            for (int i = 0; i < Dlist.Count; i++)
+            {
+                if (i == 0)
+                {
+                    switch (Dlist[i])
+                    {
+                        case DInt:
+                        case DLong:
+                            sb.Append('{');
+                            break;
+                        case DBean:
+                            sb.Append('[');
+                            break;
+                    }
+                }
+
+                if (Dlist[i] is DBean bean)
+                {
+                    WriteBean(sb, bean);
+                }
+                else
+                {
+                    sb.Append(Dlist[i].ToString());
+                }
+
+                if (i != (Dlist.Count - 1))
+                {
+                    sb.Append(',');
+                }
+
+                if (i == Dlist.Count - 1)
+                {
+                    switch (Dlist[i])
+                    {
+                        case DInt:
+                        case DLong:
+                            sb.Append('}');
+                            break;
+                        case DBean:
+                            sb.Append(']');
+                            break;
+                    }
+                }
+            }
+
+            sb.Append('"');
+        }
+
+        public void WriteMapData(StringBuilder sb, DMap map)
+        {
+            sb.Append('{');
+            var count = map.Datas.Count;
+            int idx = 0;
+            foreach (var (k, v) in map.Datas)
+            {
+                sb.Append(k);
+                sb.Append(':');
+                sb.Append(v);
+
+                if (idx != count - 1)
+                {
+                    sb.Append(',');
+                }
+
+                idx++;
+            }
+
+            sb.Append('}');
+        }
+
+        public void WriteFieldData(StringBuilder sb, DType dType,bool root)
+        {
+            if (dType is DArray)
+            {
+                WriteCollectionData(sb, dType);
+            }
+            else if (dType is DList)
+            {
+                WriteCollectionData(sb, dType);
+            }
+            else if (dType is DMap map)
+            {
+                WriteMapData(sb, map);
+            }
+            else if (dType is DString)
+            {
+                sb.Append('"');
+                sb.Append(dType.ToString());
+                sb.Append('"');
+            }
+            else if (dType is DEnum _enum)
+            {
+                sb.Append(_enum.StrValue);
+            }
+            else
+            {
+                if (dType is DBean _bean)
+                {
+                    var set = _bean.TType.DefBean.CsvSet;
+
+                    var dataType = GetDataType(set);
+
+                    var count = _bean.Fields.Count;
+
+                    if (count == 1 && (dataType == "string" || dataType == "int"))
+                    {
+                        //单字段输出值
+                        var f = _bean.Fields[0];
+
+                        //根据datatype 强转
+                        if (dataType == "int")
+                        {
+                            sb.Append(int.Parse(f.ToString().Replace("\"", "")));
+                        }
+                        else if (dataType == "string")
+                        {
+                            sb.Append(f.ToString());
+                        }
+                    }
+                    else
+                    {
+                        if (root)
+                        {
+                            sb.Append('"');
+                        }
+                       
+                        WriteBean(sb, _bean);
+
+                        if (root)
+                        {
+                            sb.Append('"');
+                        }
+                    }
+                }
+                else
+                {
+                    sb.Append(dType.ToString());
+                }
+            }
+        }
+
+
         public override OutputFile ExportTable(DefTable table, List<Record> records)
         {
             StringBuilder sb = new StringBuilder();
 
             var fileds = records[0].Data.TType.DefBean.Fields;
-
+            //=================write type
             foreach (var field in fileds)
             {
                 if (field.NeedExport())
@@ -37,53 +277,23 @@ namespace Luban.DataExporter.Builtin.Csv
 
                     if (field.CType is TArray array)
                     {
-                        switch (array.ElementType)
-                        {
-                            case TInt:
-                                sb.Append("ints");
-                                break;
-                            case TLong:
-                                sb.Append("longs");
-                                break;
-                            case TBean bean:
-                            {
-                                var def = bean.DefBean;
-
-                                sb.Append(def.JsonHead + "Ary");
-                            }
-                            break;
-                        }
+                        WriteCollectionHead(sb, array.ElementType, true);
                     }
                     else if (field.CType is TList list)
                     {
-                        switch (list.ElementType)
-                        {
-                            case TInt:
-                                sb.Append("ints");
-                                break;
-                            case TLong:
-                                sb.Append("longs");
-                                break;
-                            case TBean bean:
-                            {
-                                var def = bean.DefBean;
-
-                                sb.Append(def.JsonHead + "s");
-                            }
-                            break;
-                        }
+                        WriteCollectionHead(sb, list.ElementType, false);
                     }
 
-                    else if (field.CType is TMap map)
+                    else if (field.CType is TMap map)//todo
                     {
-                    
                         sb.Append(string.Format("json_{0}map", map.KeyType.TypeName));
                     }
+
                     else if (field.CType is TBean bean1)
                     {
                         var def = bean1.DefBean;
 
-                        sb.Append(def.JsonHead );
+                        sb.Append(GetHeadType(def.CsvSet));
                     }
                     else if (field.CType is TEnum)
                     {
@@ -100,7 +310,7 @@ namespace Luban.DataExporter.Builtin.Csv
                 }
             }
             sb.Append('\n');
-
+            //=================write data
             foreach (var record in records)
             {
                 var dbean = record.Data;
@@ -114,221 +324,22 @@ namespace Luban.DataExporter.Builtin.Csv
                 {
                     var defField = defFields[index++];
 
-                    if (!defField.NeedExport())
+                    if (defField.NeedExport())
                     {
-                        continue;
+                        WriteFieldData(sb, dType,true);
+
+                        sb.Append(',');
                     }
-
-                    if (dType is DArray array)
-                    {
-                        sb.Append('"');
-
-                        var count = array.Datas.Count;
-                        for (int i = 0; i < count; i++)
-                        {
-                            if (i == 0)
-                            {
-                                switch (array.Datas[i])
-                                {
-                                    case DInt:
-                                    case DLong:
-                                        sb.Append('{');
-                                        break;
-                                    case DBean:
-                                        sb.Append('[');
-                                        break;
-                                }
-                            }
-
-                            if (array.Datas[i] is DBean type)
-                            {
-                                //if (type.Type.IsAbstractType)
-                                //{
-                                //    sb.Append($"{{ _name:\"{type.ImplType.Name}\",");
-                                //}
-                                //else
-                                {
-                                    sb.Append('{');
-                                }
-
-                                var c = type.Fields.Count;
-
-                                for (int j = 0; j < c; j++)
-                                {
-                                    var hf = type.ImplType.HierarchyFields[j];
-                                    sb.Append('"');
-                                    sb.Append('"');
-                                    sb.Append(hf.Name);
-                                    sb.Append('"');
-                                    sb.Append('"');
-                                    sb.Append(':');
-                                    var f = type.Fields[j];
-                                    if (f != null)
-                                    {
-                                        sb.Append(f.ToString());
-                                    }
-                                    else
-                                    {
-                                        sb.Append("null");
-                                    }
-                                    if (j != c - 1)
-                                    {
-                                        sb.Append(',');
-                                    }
-
-                                }
-                                sb.Append('}');
-                            }
-                            else
-                            {
-                                sb.Append(array.Datas[i].ToString());
-                            }
-
-                            if (i != (count - 1))
-                            {
-                                sb.Append(',');
-                            }
-
-                            if (i == count - 1)
-                            {
-                                switch (array.Datas[i])
-                                {
-                                    case DInt:
-                                    case DLong:
-                                        sb.Append('}');
-                                        break;
-                                    case DBean:
-                                        sb.Append(']');
-                                        break;
-                                }
-                            }
-                        }
-
-                        sb.Append('"');
-                    }
-                    else if (dType is DList list)
-                    {
-                        sb.Append('"');
-
-                        var count = list.Datas.Count;
-                        for (int i = 0; i < count; i++)
-                        {
-                            if (i == 0)
-                            {
-                                switch (list.Datas[i])
-                                {
-                                    case DInt:
-                                    case DLong:
-                                        sb.Append('{');
-                                        break;
-                                    case DBean:
-                                        sb.Append('[');
-                                        break;
-                                }
-                            }
-
-                            if (list.Datas[i] is DBean type)
-                            {
-
-                                sb.Append('{');
-                                
-
-                                var c = type.Fields.Count;
-
-                                for (int j = 0; j < c; j++)
-                                {
-                                    var hf = type.ImplType.HierarchyFields[j];
-                                    sb.Append('"');
-                                    sb.Append('"');
-                                    sb.Append(hf.Name);
-                                    sb.Append('"');
-                                    sb.Append('"');
-                                    sb.Append(':');
-                                    var f = type.Fields[j];
-                                    if (f != null)
-                                    {
-                                        sb.Append(f.ToString());
-                                    }
-                                    else
-                                    {
-                                        sb.Append("null");
-                                    }
-                                    if (j != c - 1)
-                                    {
-                                        sb.Append(',');
-                                    }
-
-                                }
-                                sb.Append('}');
-                            }
-                            else
-                            {
-                                sb.Append(list.Datas[i].ToString());
-                            }
-
-                            if (i != (count - 1))
-                            {
-                                sb.Append(',');
-                            }
-
-                            if (i == count - 1)
-                            {
-                                switch (list.Datas[i])
-                                {
-                                    case DInt:
-                                    case DLong:
-                                        sb.Append('}');
-                                        break;
-                                    case DBean:
-                                        sb.Append(']');
-                                        break;
-                                }
-                            }
-                        }
-
-                        sb.Append('"');
-                    }
-                    else if (dType is DMap map)
-                    {
-                        sb.Append('{');
-                        var count = map.Datas.Count;
-                        int idx = 0;
-                        foreach (var (k, v) in map.Datas)
-                        {
-                            sb.Append(k);
-                            sb.Append(':');
-                            sb.Append(v);
-
-                            if (idx != count - 1)
-                            {
-                                sb.Append(',');
-                            }
-
-                            idx++;
-                        }
-
-                        sb.Append('}');
-                    }
-                    else if (dType is DString)
-                    {
-                        sb.Append(dType.ToString().Replace("\\", "\""));
-                    }
-                    else if (dType is DEnum _enum)
-                    {
-                        sb.Append(_enum.StrValue);
-                    }
-                    else
-                    {
-                        sb.Append(dType.ToString());
-                    }
-                    sb.Append(',');
                 }
+
+
                 sb.Append('\n');
             }
 
             var bytes = Encoding.UTF8.GetBytes(sb.ToString());
 
             var content = new byte[bytes.Length + 3];
+            //bom
             content[0] = 0xef;
             content[1] = 0xbb;
             content[2] = 0xbf;

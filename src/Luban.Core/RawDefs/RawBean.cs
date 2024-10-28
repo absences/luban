@@ -18,7 +18,7 @@ public class RawBean
 
     public string Alias { get; set; }
 
-    public string JsonHead { get; set; }
+    public string CsvSet { get; set; }
 
     public string Sep { get; set; }
 

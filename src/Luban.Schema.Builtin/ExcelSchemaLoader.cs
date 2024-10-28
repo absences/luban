@@ -43,7 +43,7 @@ public class ExcelSchemaLoader : SchemaLoaderBase
             Name = "__TableRecord__",
             Parent = "",
             Alias = "",
-            JsonHead = "",
+            CsvSet = "",
             IsValueType = false,
             Sep = "",
             Fields = new List<RawField>
@@ -117,7 +117,7 @@ public class ExcelSchemaLoader : SchemaLoaderBase
             Name = "__EnumItem__",
             Parent = "",
             Alias = "",
-            JsonHead = "",
+            CsvSet = "",
             IsValueType = false,
             Sep = "",
             Fields = new List<RawField>
@@ -143,7 +143,7 @@ public class ExcelSchemaLoader : SchemaLoaderBase
             Name = "__EnumInfo__",
             Parent = "",
             Alias = "",
-            JsonHead = "",
+            CsvSet = "",
             IsValueType = false,
             Sep = "",
             Fields = new List<RawField>
@@ -218,7 +218,7 @@ public class ExcelSchemaLoader : SchemaLoaderBase
             Name = "__FieldInfo__",
             Parent = "",
             Alias = "",
-            JsonHead = "",
+            CsvSet = "",
             IsValueType = false,
             Sep = "",
             Fields = new List<RawField>
@@ -248,7 +248,7 @@ public class ExcelSchemaLoader : SchemaLoaderBase
             Name = "__BeanInfo__",
             Parent = "",
             Alias = "",
-            JsonHead = "",
+            CsvSet = "",
             IsValueType = false,
             Sep = "",
             Fields = new List<RawField>
@@ -258,7 +258,7 @@ public class ExcelSchemaLoader : SchemaLoaderBase
                 new() { Name = "valueType", Type = "bool" },
                 new() { Name = "sep", Type = "string" },
                 new() { Name = "alias", Type = "string" },
-                new() { Name = "json_head", Type = "string" },
+                new() { Name = "csv_set", Type = "string" },
                 new() { Name = "comment", Type = "string" },
                 new() { Name = "tags", Type = "string" },
                 new() { Name = "group", Type = "string" },
@@ -295,7 +295,7 @@ public class ExcelSchemaLoader : SchemaLoaderBase
             string tags = (data.GetField("tags") as DString).Value.Trim();
 
             string group = (data.GetField("group") as DString).Value.Trim();
-            string json_head = (data.GetField("json_head") as DString).Value.Trim();
+            string csv_set = (data.GetField("csv_set") as DString).Value.Trim();
 
             DList fields = data.GetField("fields") as DList;
             var curBean = new RawBean()
@@ -305,7 +305,7 @@ public class ExcelSchemaLoader : SchemaLoaderBase
                 IsValueType = ((DBool)data.GetField("valueType")).Value,
                 Sep = sep,
                 Alias = alias,
-                JsonHead = json_head,
+                CsvSet = csv_set,
                 Comment = comment,
                 Tags = DefUtil.ParseAttrs(tags),
                 Groups = SchemaLoaderUtil.CreateGroups(group),

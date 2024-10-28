@@ -188,7 +188,7 @@ public class XmlSchemaLoader : SchemaLoaderBase
         );
     }
 
-    private static readonly List<string> _beanOptionsAttrs = new() { "parent", "valueType", "alias", "sep", "comment", "tags", "group" };
+    private static readonly List<string> _beanOptionsAttrs = new() { "parent", "valueType", "alias", "sep", "comment", "tags", "group" ,"csv_set" };
     private static readonly List<string> _beanRequireAttrs = new() { "name" };
 
     private TypeMapper CreateTypeMapper(XElement e, string fullName)
@@ -229,7 +229,7 @@ public class XmlSchemaLoader : SchemaLoaderBase
             Parent = parent,
             IsValueType = XmlUtil.GetOptionBoolAttribute(e, "valueType"),
             Alias = XmlUtil.GetOptionalAttribute(e, "alias"),
-            JsonHead = XmlUtil.GetOptionalAttribute(e, "json_head"),
+            CsvSet = XmlUtil.GetOptionalAttribute(e, "csv_set"),
             Sep = XmlUtil.GetOptionalAttribute(e, "sep"),
             Comment = XmlUtil.GetOptionalAttribute(e, "comment"),
             Tags = DefUtil.ParseAttrs(XmlUtil.GetOptionalAttribute(e, "tags")),
