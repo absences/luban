@@ -36,15 +36,15 @@ namespace Luban.DataExporter.Builtin.Csv
             return s.dataType;
         }
 
-        void WriteBean(StringBuilder sb, DBean type)
+        void WriteBean(StringBuilder sb, DBean bean)
         {
             sb.Append('{');
 
-            var count = type.Fields.Count;
+            var count = bean.Fields.Count;
 
             for (int i = 0; i < count; i++)
             {
-                var field = type.ImplType.HierarchyFields[i];
+                var field = bean.ImplType.HierarchyFields[i];
 
                 if (field.NeedExport())
                 {
@@ -55,7 +55,7 @@ namespace Luban.DataExporter.Builtin.Csv
                     sb.Append('"');
                     sb.Append(':');
 
-                    var f = type.Fields[i];
+                    var f = bean.Fields[i];
                     if (f != null)
                     {
                         WriteFieldData(sb, f, false);
@@ -184,7 +184,7 @@ namespace Luban.DataExporter.Builtin.Csv
             sb.Append('}');
         }
 
-        public void WriteFieldData(StringBuilder sb, DType dType,bool root)
+        public void WriteFieldData(StringBuilder sb, DType dType, bool root)
         {
             if (dType is DArray)
             {
@@ -208,51 +208,61 @@ namespace Luban.DataExporter.Builtin.Csv
             {
                 sb.Append(_enum.StrValue);
             }
-            else
+            else if (dType is DBean bean)
             {
-                if (dType is DBean _bean)
+                var set = bean.TType.DefBean.CsvSet;
+
+                var dataType = GetDataType(set);
+
+                var count = 0;
+                var fieldIdx = 0;
+
+                for (int i = 0; i < bean.Fields.Count; i++)//需要导出的字段计数
                 {
-                    var set = _bean.TType.DefBean.CsvSet;
+                    var field = bean.ImplType.HierarchyFields[i];
 
-                    var dataType = GetDataType(set);
-
-                    var count = _bean.Fields.Count;
-
-                    if (count == 1 && (dataType == "string" || dataType == "int"))
+                    if (field.NeedExport())
                     {
-                        //单字段输出值
-                        var f = _bean.Fields[0];
-
-                        //根据datatype 强转
-                        if (dataType == "int")
-                        {
-                            sb.Append(int.Parse(f.ToString().Replace("\"", "")));
-                        }
-                        else if (dataType == "string")
-                        {
-                            sb.Append(f.ToString());
-                        }
-                    }
-                    else
-                    {
-                        if (root)
-                        {
-                            sb.Append('"');
-                        }
-                       
-                        WriteBean(sb, _bean);
-
-                        if (root)
-                        {
-                            sb.Append('"');
-                        }
+                        count++;
+                        fieldIdx = i;
                     }
                 }
-                else
+                //单字段输出值
+                if (count == 1 && (dataType == "string" || dataType == "int"))
                 {
-                    sb.Append(dType.ToString());
+                  
+                    var f = bean.Fields[fieldIdx];
+
+                    //根据datatype 强转
+                    if (dataType == "int")
+                    {
+                        sb.Append(int.Parse(f.ToString().Replace("\"", "")));
+                    }
+                    else if (dataType == "string")
+                    {
+                        sb.Append(f.ToString());
+                    }
+                }
+                else//输出json格式
+                {
+                    if (root)
+                    {
+                        sb.Append('"');
+                    }
+
+                    WriteBean(sb, bean);
+
+                    if (root)
+                    {
+                        sb.Append('"');
+                    }
                 }
             }
+            else
+            {
+                sb.Append(dType.ToString());
+            }
+
         }
 
 
@@ -326,7 +336,7 @@ namespace Luban.DataExporter.Builtin.Csv
 
                     if (defField.NeedExport())
                     {
-                        WriteFieldData(sb, dType,true);
+                        WriteFieldData(sb, dType, true);
 
                         sb.Append(',');
                     }
