@@ -26,12 +26,20 @@ namespace Luban.DataExporter.Builtin.Csv
 
         public string GetHeadType(string set)
         {
+            if (string.IsNullOrEmpty(set))
+            {
+                return string.Empty;
+            }
             var s = JsonSerializer.Deserialize<CsvSet>(set);
             return s.headType;
         }
 
         public string GetDataType(string set)
         {
+            if (string.IsNullOrEmpty(set))
+            {
+                return string.Empty;
+            }
             var s = JsonSerializer.Deserialize<CsvSet>(set);
             return s.dataType;
         }
