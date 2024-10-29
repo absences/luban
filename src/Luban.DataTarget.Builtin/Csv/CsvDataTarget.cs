@@ -46,42 +46,78 @@ namespace Luban.DataExporter.Builtin.Csv
 
         void WriteBean(StringBuilder sb, DBean bean)
         {
-            sb.Append('{');
+            var ss = new MemoryStream();
+            var jsonWriter = new Utf8JsonWriter(ss, new JsonWriterOptions()
+            {
+                Indented = false,
+                SkipValidation = false,
+                Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+            });
+
+            AcceptBean(bean, jsonWriter);
+
+            jsonWriter.Flush();
+
+            var json = Encoding.UTF8.GetString(DataUtil.StreamToBytes(ss));
+            sb.Append(json.Replace("\"", "\"\""));
+        }
+
+        void AcceptBean(DBean bean, Utf8JsonWriter x)
+        {
+            x.WriteStartObject();
 
             var count = bean.Fields.Count;
 
             for (int i = 0; i < count; i++)
             {
-                var field = bean.ImplType.HierarchyFields[i];
+                var defFields = bean.ImplType.HierarchyFields[i];
 
-                if (field.NeedExport())
+                if (defFields.NeedExport())
                 {
-                    sb.Append('"');
-                    sb.Append('"');
-                    sb.Append(field.Name);
-                    sb.Append('"');
-                    sb.Append('"');
-                    sb.Append(':');
+                    x.WritePropertyName(defFields.Name);
 
-                    var f = bean.Fields[i];
-                    if (f != null)
+                    var field = bean.Fields[i];
+
+                    switch (field)
                     {
-                        WriteFieldData(sb, f, false);
-                    }
-                    else
-                    {
-                        sb.Append("null");
+                        case DBool type:
+                            x.WriteBooleanValue(type.Value); 
+                            break;
+                        case DByte type:
+                            x.WriteNumberValue(type.Value);
+                            break;
+                        case DShort type:
+                            x.WriteNumberValue(type.Value);
+                            break;
+                        case DInt type:
+                            x.WriteNumberValue(type.Value);
+                            break;
+                        case DLong type:
+                            x.WriteNumberValue(type.Value);
+                            break;
+                        case DFloat type:
+                            x.WriteNumberValue(type.Value);
+                            break;
+                        case DDouble type:
+                            x.WriteNumberValue(type.Value);
+                            break;
+                        case DString type:
+                            x.WriteStringValue(type.Value);
+                            break;
+                        case DBean type:
+                            AcceptBean(bean, x);
+                            break;
+                        case DEnum type:
+                            x.WriteStringValue(type.StrValue);
+                            break;
                     }
 
-                }
-
-                if (i != count - 1)
-                {
-                    sb.Append(',');
                 }
             }
-            sb.Append('}');
+
+            x.WriteEndObject();
         }
+
         /// <summary>
         /// 容器类型写入
         /// </summary>
@@ -141,18 +177,9 @@ namespace Luban.DataExporter.Builtin.Csv
                     sb.Append('[');
                 }
                 var dtype = Dlist[i];
-                if (dtype is DBean bean)
-                {
-                    WriteBean(sb, bean);
-                }
-                else if (dtype is DString str)
-                {
-                    sb.Append(DataUtil.EscapeString(str.Value));
-                }
-                else
-                {
-                    sb.Append(dtype.ToString());
-                }
+
+                WriteFieldData(sb, dtype, false);
+
 
                 if (i != (Dlist.Count - 1))
                 {
@@ -204,9 +231,9 @@ namespace Luban.DataExporter.Builtin.Csv
             {
                 WriteMapData(sb, map);
             }
-            else if (dType is DString)
+            else if (dType is DString str)
             {
-                sb.Append(dType.ToString());
+                sb.Append(DataUtil.EscapeString(str.Value));
             }
             else if (dType is DEnum _enum)
             {
@@ -216,6 +243,7 @@ namespace Luban.DataExporter.Builtin.Csv
             {
                 var set = bean.TType.DefBean.CsvSet;
 
+                var headType = GetHeadType(set);
                 var dataType = GetDataType(set);
 
                 var count = 0;
@@ -231,6 +259,7 @@ namespace Luban.DataExporter.Builtin.Csv
                         fieldIdx = i;
                     }
                 }
+              
                 //单字段输出值
                 if (count == 1 && (dataType == "string" || dataType == "int"))
                 {
@@ -246,13 +275,12 @@ namespace Luban.DataExporter.Builtin.Csv
                         sb.Append(f.ToString());
                     }
                 }
-                else//输出json格式
+                else if (headType.StartsWith("json"))
                 {
                     if (root)
                     {
                         sb.Append('"');
                     }
-
                     WriteBean(sb, bean);
 
                     if (root)
@@ -281,8 +309,8 @@ namespace Luban.DataExporter.Builtin.Csv
                 {
                     sb.Append('"');
                     sb.Append(field.Comment);
-                    sb.Append('{');
 
+                    sb.Append('{');
                     sb.Append(field.Name.Substring(0, 1).ToLower());//首字母小写
                     sb.Append(field.Name.Substring(1));
 
