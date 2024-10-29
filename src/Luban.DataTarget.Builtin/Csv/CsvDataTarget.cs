@@ -140,20 +140,18 @@ namespace Luban.DataExporter.Builtin.Csv
                 {
                     sb.Append('[');
                 }
-
-                if (Dlist[i] is DBean bean)
+                var dtype = Dlist[i];
+                if (dtype is DBean bean)
                 {
                     WriteBean(sb, bean);
                 }
-                else if (Dlist[i] is DString)
+                else if (dtype is DString str)
                 {
-                    sb.Append('"');
-                    sb.Append(Dlist[i].ToString());
-                    sb.Append('"');
+                    sb.Append(DataUtil.EscapeString(str.Value));
                 }
                 else
                 {
-                    sb.Append(Dlist[i].ToString());
+                    sb.Append(dtype.ToString());
                 }
 
                 if (i != (Dlist.Count - 1))
@@ -208,9 +206,7 @@ namespace Luban.DataExporter.Builtin.Csv
             }
             else if (dType is DString)
             {
-                sb.Append('"');
                 sb.Append(dType.ToString());
-                sb.Append('"');
             }
             else if (dType is DEnum _enum)
             {
@@ -238,7 +234,6 @@ namespace Luban.DataExporter.Builtin.Csv
                 //单字段输出值
                 if (count == 1 && (dataType == "string" || dataType == "int"))
                 {
-
                     var f = bean.Fields[fieldIdx];
 
                     //根据datatype 强转
@@ -313,7 +308,7 @@ namespace Luban.DataExporter.Builtin.Csv
 
                         sb.Append(GetHeadType(def.CsvSet));
                     }
-                    else if (field.CType is TEnum)
+                    else if (field.CType is TEnum or TString)
                     {
                         sb.Append("str");
                     }
