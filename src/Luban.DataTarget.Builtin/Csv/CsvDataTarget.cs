@@ -82,16 +82,28 @@ namespace Luban.DataExporter.Builtin.Csv
             }
             sb.Append('}');
         }
-
+        /// <summary>
+        /// 容器类型写入
+        /// </summary>
+        /// <param name="sb"></param>
+        /// <param name="elementType"></param>
+        /// <param name="array"></param>
         public void WriteCollectionHead(StringBuilder sb, TType elementType, bool array)
         {
             switch (elementType)
             {
                 case TInt:
-                    sb.Append("ints");
-                    break;
                 case TLong:
-                    sb.Append("longs");
+                case TDouble:
+                case TBool:
+                case TByte:
+                case TShort:
+                case TFloat:
+                    sb.Append(elementType.TypeName);
+                    sb.Append('s');
+                    break;
+                case TString:
+                    sb.Append("strs");
                     break;
                 case TBean bean:
                 {
@@ -126,21 +138,18 @@ namespace Luban.DataExporter.Builtin.Csv
             {
                 if (i == 0)
                 {
-                    switch (Dlist[i])
-                    {
-                        case DInt:
-                        case DLong:
-                            sb.Append('{');
-                            break;
-                        case DBean:
-                            sb.Append('[');
-                            break;
-                    }
+                    sb.Append('[');
                 }
 
                 if (Dlist[i] is DBean bean)
                 {
                     WriteBean(sb, bean);
+                }
+                else if (Dlist[i] is DString)
+                {
+                    sb.Append('"');
+                    sb.Append(Dlist[i].ToString());
+                    sb.Append('"');
                 }
                 else
                 {
@@ -154,16 +163,7 @@ namespace Luban.DataExporter.Builtin.Csv
 
                 if (i == Dlist.Count - 1)
                 {
-                    switch (Dlist[i])
-                    {
-                        case DInt:
-                        case DLong:
-                            sb.Append('}');
-                            break;
-                        case DBean:
-                            sb.Append(']');
-                            break;
-                    }
+                    sb.Append(']');
                 }
             }
 
@@ -238,7 +238,7 @@ namespace Luban.DataExporter.Builtin.Csv
                 //单字段输出值
                 if (count == 1 && (dataType == "string" || dataType == "int"))
                 {
-                  
+
                     var f = bean.Fields[fieldIdx];
 
                     //根据datatype 强转
