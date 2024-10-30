@@ -62,6 +62,44 @@ namespace Luban.DataExporter.Builtin.Csv
             sb.Append(json.Replace("\"", "\"\""));
         }
 
+        void AcceptType(DType field, Utf8JsonWriter x)
+        {
+            switch (field)
+            {
+                case DBool type:
+                    x.WriteBooleanValue(type.Value);
+                    break;
+                case DByte type:
+                    x.WriteNumberValue(type.Value);
+                    break;
+                case DShort type:
+                    x.WriteNumberValue(type.Value);
+                    break;
+                case DInt type:
+                    x.WriteNumberValue(type.Value);
+                    break;
+                case DLong type:
+                    x.WriteNumberValue(type.Value);
+                    break;
+                case DFloat type:
+                    x.WriteNumberValue(type.Value);
+                    break;
+                case DDouble type:
+                    x.WriteNumberValue(type.Value);
+                    break;
+                case DString type:
+                    x.WriteStringValue(type.Value);
+                    break;
+                case DBean type:
+                    AcceptBean(type, x);
+                    break;
+                case DEnum type:
+                    x.WriteStringValue(type.StrValue);
+                    break;
+            }
+        }
+
+
         void AcceptBean(DBean bean, Utf8JsonWriter x)
         {
             x.WriteStartObject();
@@ -78,40 +116,8 @@ namespace Luban.DataExporter.Builtin.Csv
 
                     var field = bean.Fields[i];
 
-                    switch (field)
-                    {
-                        case DBool type:
-                            x.WriteBooleanValue(type.Value); 
-                            break;
-                        case DByte type:
-                            x.WriteNumberValue(type.Value);
-                            break;
-                        case DShort type:
-                            x.WriteNumberValue(type.Value);
-                            break;
-                        case DInt type:
-                            x.WriteNumberValue(type.Value);
-                            break;
-                        case DLong type:
-                            x.WriteNumberValue(type.Value);
-                            break;
-                        case DFloat type:
-                            x.WriteNumberValue(type.Value);
-                            break;
-                        case DDouble type:
-                            x.WriteNumberValue(type.Value);
-                            break;
-                        case DString type:
-                            x.WriteStringValue(type.Value);
-                            break;
-                        case DBean type:
-                            AcceptBean(bean, x);
-                            break;
-                        case DEnum type:
-                            x.WriteStringValue(type.StrValue);
-                            break;
-                    }
-
+                    AcceptType(field, x);
+                   
                 }
             }
 
@@ -197,24 +203,41 @@ namespace Luban.DataExporter.Builtin.Csv
 
         public void WriteMapData(StringBuilder sb, DMap map)
         {
-            sb.Append('{');
             var count = map.Datas.Count;
-            int idx = 0;
-            foreach (var (k, v) in map.Datas)
+  
+            var keyType= map.Type.KeyType;
+            var valueType= map.Type.ValueType;
+
+            var ss = new MemoryStream();
+            var jsonWriter = new Utf8JsonWriter(ss, new JsonWriterOptions()
             {
-                sb.Append(k);
-                sb.Append(':');
-                sb.Append(v);
+                Indented = false,
+                SkipValidation = false,
+                Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+            });
 
-                if (idx != count - 1)
-                {
-                    sb.Append(',');
-                }
+            AcceptMap(map, jsonWriter);
 
-                idx++;
+            jsonWriter.Flush();
+
+            var json = Encoding.UTF8.GetString(DataUtil.StreamToBytes(ss));
+            sb.Append(json.Replace("\"", "\"\""));
+
+        }
+        void AcceptMap(DMap map, Utf8JsonWriter x)
+        {
+            x.WriteStartArray();
+            foreach (var d in map.Datas)
+            {
+                x.WriteStartArray();
+
+                AcceptType(d.Key,x);
+
+                AcceptType(d.Value,x);
+
+                x.WriteEndArray();
             }
-
-            sb.Append('}');
+            x.WriteEndArray();
         }
 
         public void WriteFieldData(StringBuilder sb, DType dType, bool root)
@@ -229,7 +252,15 @@ namespace Luban.DataExporter.Builtin.Csv
             }
             else if (dType is DMap map)
             {
+                if (root)
+                {
+                    sb.Append('"');
+                }
                 WriteMapData(sb, map);
+                if (root)
+                {
+                    sb.Append('"');
+                }
             }
             else if (dType is DString str)
             {
@@ -259,7 +290,7 @@ namespace Luban.DataExporter.Builtin.Csv
                         fieldIdx = i;
                     }
                 }
-              
+
                 //单字段输出值
                 if (count == 1 && (dataType == "string" || dataType == "int"))
                 {
@@ -325,9 +356,16 @@ namespace Luban.DataExporter.Builtin.Csv
                         WriteCollectionHead(sb, list.ElementType, false);
                     }
 
-                    else if (field.CType is TMap map)//todo
+                    else if (field.CType is TMap map)
                     {
-                        sb.Append(string.Format("json_{0}map", map.KeyType.TypeName));
+                        if (map.Tags.TryGetValue("headType", out var headType))
+                        {
+                            sb.Append(headType);
+                        }
+                        else
+                        {
+                            throw new Exception($"map headType为空");
+                        }
                     }
 
                     else if (field.CType is TBean bean1)
