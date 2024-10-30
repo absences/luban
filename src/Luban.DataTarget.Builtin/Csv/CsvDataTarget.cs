@@ -201,43 +201,27 @@ namespace Luban.DataExporter.Builtin.Csv
             sb.Append('"');
         }
 
-        public void WriteMapData(StringBuilder sb, DMap map)
+        void AcceptMap(StringBuilder sb, DMap map)
         {
+            sb.Append('{');
+
             var count = map.Datas.Count;
-  
-            var keyType= map.Type.KeyType;
-            var valueType= map.Type.ValueType;
-
-            var ss = new MemoryStream();
-            var jsonWriter = new Utf8JsonWriter(ss, new JsonWriterOptions()
-            {
-                Indented = false,
-                SkipValidation = false,
-                Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
-            });
-
-            AcceptMap(map, jsonWriter);
-
-            jsonWriter.Flush();
-
-            var json = Encoding.UTF8.GetString(DataUtil.StreamToBytes(ss));
-            sb.Append(json.Replace("\"", "\"\""));
-
-        }
-        void AcceptMap(DMap map, Utf8JsonWriter x)
-        {
-            x.WriteStartArray();
+            int index = 0;
             foreach (var d in map.Datas)
             {
-                x.WriteStartArray();
+                WriteFieldData(sb, d.Key, false);
 
-                AcceptType(d.Key,x);
+                sb.Append(':');
 
-                AcceptType(d.Value,x);
+                WriteFieldData(sb, d.Value, false);
 
-                x.WriteEndArray();
+                if (index != count - 1)
+                {
+                    sb.Append(',');
+                }
+                index++;
             }
-            x.WriteEndArray();
+            sb.Append('}');
         }
 
         public void WriteFieldData(StringBuilder sb, DType dType, bool root)
@@ -256,7 +240,7 @@ namespace Luban.DataExporter.Builtin.Csv
                 {
                     sb.Append('"');
                 }
-                WriteMapData(sb, map);
+                AcceptMap(sb, map);
                 if (root)
                 {
                     sb.Append('"');
