@@ -316,7 +316,7 @@ namespace Luban.DataExporter.Builtin.Csv
         {
             StringBuilder sb = new StringBuilder();
 
-            var fileds = records[0].Data.TType.DefBean.Fields;
+            var fileds = table.ValueTType.DefBean.Fields;
             //=================write type
             foreach (var field in fileds)
             {
