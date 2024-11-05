@@ -252,7 +252,11 @@ namespace Luban.DataExporter.Builtin.Csv
             }
             else if (dType is DEnum _enum)
             {
-                sb.Append(_enum.StrValue);
+                var type = _enum.Type;
+
+                var item = type.DefEnum.Items[_enum.Value];
+
+                sb.Append(item.Name);
             }
             else if (dType is DBean bean)
             {
