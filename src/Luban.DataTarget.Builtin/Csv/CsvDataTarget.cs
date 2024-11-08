@@ -368,7 +368,7 @@ namespace Luban.DataExporter.Builtin.Csv
                     }
                     else
                     {
-                        sb.Append(field.Type);
+                        sb.Append(field.CType.TypeName);
                     }
 
                     sb.Append('}');
