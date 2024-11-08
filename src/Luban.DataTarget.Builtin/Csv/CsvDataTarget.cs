@@ -117,7 +117,7 @@ namespace Luban.DataExporter.Builtin.Csv
                     var field = bean.Fields[i];
 
                     AcceptType(field, x);
-                   
+
                 }
             }
 
@@ -254,7 +254,7 @@ namespace Luban.DataExporter.Builtin.Csv
             {
                 var type = _enum.Type;
 
-                var item = type.DefEnum.Items[_enum.Value];
+                var item = type.DefEnum.Items.First(f => f.IntValue == _enum.Value);
 
                 sb.Append(item.Name);
             }
