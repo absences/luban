@@ -3,7 +3,6 @@ using Luban.DataTarget;
 using Luban.Defs;
 using Luban.Types;
 using Luban.Utils;
-using System.Collections.Generic;
 using System.Text;
 using System.Text.Json;
 
@@ -24,7 +23,7 @@ namespace Luban.DataExporter.Builtin.Csv
             public string dataType { get; set; }
         }
 
-        public string GetHeadType(string set)
+        public static string GetHeadType(string set)
         {
             if (string.IsNullOrEmpty(set))
             {
@@ -34,7 +33,7 @@ namespace Luban.DataExporter.Builtin.Csv
             return s.headType;
         }
 
-        public string GetDataType(string set)
+        public static string GetDataType(string set)
         {
             if (string.IsNullOrEmpty(set))
             {
@@ -98,7 +97,6 @@ namespace Luban.DataExporter.Builtin.Csv
                     break;
             }
         }
-
 
         void AcceptBean(DBean bean, Utf8JsonWriter x)
         {
@@ -165,6 +163,7 @@ namespace Luban.DataExporter.Builtin.Csv
         public void WriteCollectionData(StringBuilder sb, DType type)
         {
             sb.Append('"');
+
             List<DType> Dlist = null;
 
             if (type is DList list)
@@ -315,13 +314,13 @@ namespace Luban.DataExporter.Builtin.Csv
 
         }
 
-
         public override OutputFile ExportTable(DefTable table, List<Record> records)
         {
             StringBuilder sb = new StringBuilder();
 
             var fileds = table.ValueTType.DefBean.Fields;
-            //=================write type
+
+            //================= write type
             foreach (var field in fileds)
             {
                 if (field.NeedExport())
@@ -376,8 +375,10 @@ namespace Luban.DataExporter.Builtin.Csv
                     sb.Append(',');
                 }
             }
+
             sb.Append('\n');
-            //=================write data
+
+            //================= write data
             foreach (var record in records)
             {
                 var dbean = record.Data;
@@ -387,6 +388,7 @@ namespace Luban.DataExporter.Builtin.Csv
                 var defFields = dbean.ImplType.HierarchyFields;
 
                 int index = 0;
+
                 foreach (DType dType in data)
                 {
                     var defField = defFields[index++];
@@ -398,7 +400,6 @@ namespace Luban.DataExporter.Builtin.Csv
                         sb.Append(',');
                     }
                 }
-
 
                 sb.Append('\n');
             }
@@ -413,7 +414,7 @@ namespace Luban.DataExporter.Builtin.Csv
 
             Buffer.BlockCopy(bytes, 0, content, 3, bytes.Length);
 
-            return CreateOutputFile($"{table.OutputDataFile}.{OutputFileExt}", Encoding.UTF8.GetString(content));
+            return CreateOutputFile($"{table.OutputDataFile}.{OutputFileExt}", content);
         }
     }
 }
