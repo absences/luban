@@ -3,6 +3,7 @@ using Luban.DataTarget;
 using Luban.Defs;
 using Luban.Types;
 using Luban.Utils;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 
@@ -95,7 +96,31 @@ namespace Luban.DataExporter.Builtin.Csv
                 case DEnum type:
                     x.WriteStringValue(type.StrValue);
                     break;
+                case DList type:
+                    AcceptList(type.Datas, x);
+                    break;
+                case DArray type:
+                    AcceptList(type.Datas, x);
+                    break;
+                case DMap type:
+                    AcceptMap(type, x);
+                    break;
             }
+        }
+        void AcceptMap(DMap map, Utf8JsonWriter x)
+        {
+            StringBuilder sb = new StringBuilder();
+            AcceptMap(sb, map);
+            x.WriteStringValue(sb.ToString());
+        }
+        void AcceptList(List<DType> datas, Utf8JsonWriter x)
+        {
+            x.WriteStartArray();
+            foreach (var item in datas)
+            {
+                AcceptType(item, x);
+            }
+            x.WriteEndArray();
         }
 
         void AcceptBean(DBean bean, Utf8JsonWriter x)
@@ -111,11 +136,9 @@ namespace Luban.DataExporter.Builtin.Csv
                 if (defFields.NeedExport())
                 {
                     x.WritePropertyName(defFields.Name);
-
                     var field = bean.Fields[i];
 
                     AcceptType(field, x);
-
                 }
             }
 
@@ -162,8 +185,6 @@ namespace Luban.DataExporter.Builtin.Csv
         /// <param name="type"></param>
         public void WriteCollectionData(StringBuilder sb, DType type)
         {
-            sb.Append('"');
-
             List<DType> Dlist = null;
 
             if (type is DList list)
@@ -183,7 +204,7 @@ namespace Luban.DataExporter.Builtin.Csv
                 }
                 var dtype = Dlist[i];
 
-                WriteFieldData(sb, dtype, false);
+                WriteFieldData(sb, dtype);
 
 
                 if (i != (Dlist.Count - 1))
@@ -196,8 +217,6 @@ namespace Luban.DataExporter.Builtin.Csv
                     sb.Append(']');
                 }
             }
-
-            sb.Append('"');
         }
 
         void AcceptMap(StringBuilder sb, DMap map)
@@ -208,11 +227,11 @@ namespace Luban.DataExporter.Builtin.Csv
             int index = 0;
             foreach (var d in map.Datas)
             {
-                WriteFieldData(sb, d.Key, false);
+                WriteFieldData(sb, d.Key);
 
                 sb.Append(':');
 
-                WriteFieldData(sb, d.Value, false);
+                WriteFieldData(sb, d.Value);
 
                 if (index != count - 1)
                 {
@@ -222,16 +241,37 @@ namespace Luban.DataExporter.Builtin.Csv
             }
             sb.Append('}');
         }
-
-        public void WriteFieldData(StringBuilder sb, DType dType, bool root)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sb"></param>
+        /// <param name="dType"></param>
+        /// <param name="root">是否是表头字段</param>
+        public void WriteFieldData(StringBuilder sb, DType dType, bool root = false)
         {
             if (dType is DArray)
             {
+                if (root)//表字段需要加引号 ，
+                {
+                    sb.Append('"');
+                }
                 WriteCollectionData(sb, dType);
+                if (root)
+                {
+                    sb.Append('"');
+                }
             }
             else if (dType is DList)
             {
+                if (root)
+                {
+                    sb.Append('"');
+                }
                 WriteCollectionData(sb, dType);
+                if (root)
+                {
+                    sb.Append('"');
+                }
             }
             else if (dType is DMap map)
             {
