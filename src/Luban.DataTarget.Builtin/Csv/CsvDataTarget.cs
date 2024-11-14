@@ -3,7 +3,6 @@ using Luban.DataTarget;
 using Luban.Defs;
 using Luban.Types;
 using Luban.Utils;
-using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 
@@ -94,7 +93,8 @@ namespace Luban.DataExporter.Builtin.Csv
                     AcceptBean(type, x);
                     break;
                 case DEnum type:
-                    x.WriteStringValue(type.StrValue);
+                    var item = type.Type.DefEnum.Items.First(f => f.IntValue == type.Value);
+                    x.WriteStringValue(item.Name);
                     break;
                 case DList type:
                     AcceptList(type.Datas, x);
@@ -109,9 +109,24 @@ namespace Luban.DataExporter.Builtin.Csv
         }
         void AcceptMap(DMap map, Utf8JsonWriter x)
         {
-            StringBuilder sb = new StringBuilder();
-            AcceptMap(sb, map);
-            x.WriteStringValue(sb.ToString());
+            x.WriteStartObject();
+
+            foreach (var pair in map.Datas)//字典以key作字段名
+            {
+                var key = pair.Key;
+                if (key is DString str)
+                {
+                    x.WritePropertyName(str.Value);
+                }
+                else
+                {
+                    x.WritePropertyName(pair.Key.ToString());
+                }
+
+                AcceptType(pair.Value, x);
+            }
+
+            x.WriteEndObject();
         }
         void AcceptList(List<DType> datas, Utf8JsonWriter x)
         {
@@ -135,10 +150,29 @@ namespace Luban.DataExporter.Builtin.Csv
 
                 if (defFields.NeedExport())
                 {
-                    x.WritePropertyName(defFields.Name);
                     var field = bean.Fields[i];
+                    bool hasElement = true;
+                    if (defFields.CType.IsCollection)
+                    {
+                        if (field is DList list)
+                        {
+                            hasElement = list.Datas.Count > 0;
+                        }
+                        else if (field is DArray array)
+                        {
+                            hasElement = array.Datas.Count > 0;
+                        }
+                        else if (field is DMap map)
+                        {
+                            hasElement = map.Datas.Count > 0;
+                        }
+                    }
+                    if (hasElement)
+                    {
+                        x.WritePropertyName(defFields.Name);
 
-                    AcceptType(field, x);
+                        AcceptType(field, x);
+                    }
                 }
             }
 
