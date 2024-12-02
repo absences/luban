@@ -40,7 +40,7 @@ namespace Luban.DataExporter.Builtin.Csv
 
         public void Accept(DBool type, StringBuilder x)
         {
-            x.Append(type.Value);
+            x.Append(type.Value.ToString().ToLower());
         }
 
         public void Accept(DByte type, StringBuilder x)
