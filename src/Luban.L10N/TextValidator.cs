@@ -27,7 +27,7 @@ public class TextValidator : DataValidatorBase
         {
             return;
         }
-        string key = ((DString)data).Value;
+        var key = ((DInt)data).Value.ToString();
         if (string.IsNullOrEmpty(key))
         {
             return;
