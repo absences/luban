@@ -1,4 +1,4 @@
-﻿using Luban.Datas;
+using Luban.Datas;
 using Luban.DataVisitors;
 using Luban.Utils;
 using System.Text;
@@ -153,12 +153,11 @@ namespace Luban.DataExporter.Builtin.Csv
 
         void AcceptList(List<DType> datas, StringBuilder x)
         {
+            x.Append('[');
+            
             for (int i = 0; i < datas.Count; i++)
             {
-                if (i == 0)
-                {
-                    x.Append('[');
-                }
+             
                 var dtype = datas[i];
 
                 dtype.Apply(this, x);
@@ -167,12 +166,10 @@ namespace Luban.DataExporter.Builtin.Csv
                 {
                     x.Append(',');
                 }
-
-                if (i == datas.Count - 1)
-                {
-                    x.Append(']');
-                }
             }
+
+            x.Append(']');
+            
         }
         public void Accept(DArray type, StringBuilder x)
         {
@@ -193,12 +190,11 @@ namespace Luban.DataExporter.Builtin.Csv
         {
             var count = type.Datas.Count;
             int index = 0;
+
+            x.Append('{');
+
             foreach (var d in type.Datas)
             {
-                if (index == 0)
-                {
-                    x.Append('{');
-                }
                 d.Key.Apply(this, x);
 
                 x.Append(':');
@@ -209,13 +205,10 @@ namespace Luban.DataExporter.Builtin.Csv
                 {
                     x.Append(',');
                 }
-                else
-                {
-                    x.Append('}');
-                }
-
                 index++;
             }
+
+            x.Append('}');
         }
     }
 }
