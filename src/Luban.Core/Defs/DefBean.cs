@@ -44,6 +44,8 @@ public class DefBean : DefTypeBase
 
     public string Alias { get; }
 
+    public string CsvSet { get; }
+
     public bool IsMultiRow { get; set; }
 
     public string Sep { get; }
@@ -90,6 +92,7 @@ public class DefBean : DefTypeBase
             Fields.Add(CreateField(field, 0));
         }
         Alias = b.Alias;
+        CsvSet = b.CsvSet;
         Sep = b.Sep;
         IsValueType = b.IsValueType;
         Groups = b.Groups;

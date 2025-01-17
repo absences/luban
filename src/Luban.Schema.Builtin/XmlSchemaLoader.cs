@@ -229,6 +229,7 @@ public class XmlSchemaLoader : SchemaLoaderBase
             Parent = parent,
             IsValueType = XmlUtil.GetOptionBoolAttribute(e, "valueType"),
             Alias = XmlUtil.GetOptionalAttribute(e, "alias"),
+            CsvSet = XmlUtil.GetOptionalAttribute(e, "csv_set"),
             Sep = XmlUtil.GetOptionalAttribute(e, "sep"),
             Comment = XmlUtil.GetOptionalAttribute(e, "comment"),
             Tags = DefUtil.ParseAttrs(XmlUtil.GetOptionalAttribute(e, "tags")),

@@ -43,6 +43,7 @@ public class ExcelSchemaLoader : SchemaLoaderBase
             Name = "__TableRecord__",
             Parent = "",
             Alias = "",
+            CsvSet = "",
             IsValueType = false,
             Sep = "",
             Fields = new List<RawField>
@@ -100,7 +101,8 @@ public class ExcelSchemaLoader : SchemaLoaderBase
             // string options = (data.GetField("options") as DString).Value.Trim(); 
             var table = SchemaLoaderUtil.CreateTable(fileName, name, module, valueType, index, mode, group, comment, readSchemaFromFile, inputFile, tags, outputFile);
             Collector.Add(table);
-        };
+        }
+        ;
     }
 
     private void LoadEnumListFromFile(string fileName)
@@ -116,6 +118,7 @@ public class ExcelSchemaLoader : SchemaLoaderBase
             Name = "__EnumItem__",
             Parent = "",
             Alias = "",
+            CsvSet = "",
             IsValueType = false,
             Sep = "",
             Fields = new List<RawField>
@@ -141,6 +144,7 @@ public class ExcelSchemaLoader : SchemaLoaderBase
             Name = "__EnumInfo__",
             Parent = "",
             Alias = "",
+            CsvSet = "",
             IsValueType = false,
             Sep = "",
             Fields = new List<RawField>
@@ -199,7 +203,8 @@ public class ExcelSchemaLoader : SchemaLoaderBase
                 }).ToList(),
             };
             Collector.Add(curEnum);
-        };
+        }
+        ;
     }
 
     private void LoadBeanListFromFile(string fileName)
@@ -215,6 +220,7 @@ public class ExcelSchemaLoader : SchemaLoaderBase
             Name = "__FieldInfo__",
             Parent = "",
             Alias = "",
+            CsvSet = "",
             IsValueType = false,
             Sep = "",
             Fields = new List<RawField>
@@ -244,6 +250,7 @@ public class ExcelSchemaLoader : SchemaLoaderBase
             Name = "__BeanInfo__",
             Parent = "",
             Alias = "",
+            CsvSet = "",
             IsValueType = false,
             Sep = "",
             Fields = new List<RawField>
@@ -289,6 +296,7 @@ public class ExcelSchemaLoader : SchemaLoaderBase
             string tags = (data.GetField("tags") as DString).Value.Trim();
             string group = (data.GetField("group") as DString).Value.Trim();
             DList fields = data.GetField("fields") as DList;
+            string csv_set = (data.GetField("csv_set") as DString).Value.Trim();
             var curBean = new RawBean()
             {
                 Name = name,
@@ -296,6 +304,7 @@ public class ExcelSchemaLoader : SchemaLoaderBase
                 IsValueType = ((DBool)data.GetField("valueType")).Value,
                 Sep = sep,
                 Alias = alias,
+                CsvSet = csv_set,
                 Comment = comment,
                 Tags = DefUtil.ParseAttrs(tags),
                 Groups = SchemaLoaderUtil.CreateGroups(group),
@@ -313,6 +322,7 @@ public class ExcelSchemaLoader : SchemaLoaderBase
                 )).ToList(),
             };
             Collector.Add(curBean);
-        };
+        }
+        ;
     }
 }
