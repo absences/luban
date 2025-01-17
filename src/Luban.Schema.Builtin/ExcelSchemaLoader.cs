@@ -260,6 +260,7 @@ public class ExcelSchemaLoader : SchemaLoaderBase
                 new() { Name = "valueType", Type = "bool" },
                 new() { Name = "sep", Type = "string" },
                 new() { Name = "alias", Type = "string" },
+                new() { Name = "csv_set", Type = "string" },
                 new() { Name = "comment", Type = "string" },
                 new() { Name = "tags", Type = "string" },
                 new() { Name = "group", Type = "string" },

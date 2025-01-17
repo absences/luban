@@ -188,7 +188,7 @@ public class XmlSchemaLoader : SchemaLoaderBase
         );
     }
 
-    private static readonly List<string> _beanOptionsAttrs = new() { "parent", "valueType", "alias", "sep", "comment", "tags", "group" };
+    private static readonly List<string> _beanOptionsAttrs = new() { "parent", "valueType", "alias", "sep", "comment", "tags", "group", "csv_set" };
     private static readonly List<string> _beanRequireAttrs = new() { "name" };
 
     private TypeMapper CreateTypeMapper(XElement e, string fullName)
