@@ -32,7 +32,10 @@ public class TextKeyListCollectorVisitor : IDataActionVisitor2<TextKeyCollection
 
     public void Accept(DInt data, TType type, TextKeyCollection x)
     {
-
+        if (data != null && type.HasTag("text"))
+        {
+            x.AddKey(data.Value.ToString());
+        }
     }
 
     public void Accept(DLong data, TType type, TextKeyCollection x)
