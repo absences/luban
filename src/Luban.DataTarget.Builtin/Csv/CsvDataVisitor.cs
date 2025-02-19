@@ -79,7 +79,7 @@ namespace Luban.DataExporter.Builtin.Csv
 
             var item = t.DefEnum.Items.First(f => f.IntValue == type.Value);
 
-            x.Append(item.Name);
+            x.Append(item.IntValue);
         }
 
         public void Accept(DString type, StringBuilder x)
@@ -154,10 +154,10 @@ namespace Luban.DataExporter.Builtin.Csv
         void AcceptList(List<DType> datas, StringBuilder x)
         {
             x.Append('[');
-            
+
             for (int i = 0; i < datas.Count; i++)
             {
-             
+
                 var dtype = datas[i];
 
                 dtype.Apply(this, x);
@@ -169,7 +169,7 @@ namespace Luban.DataExporter.Builtin.Csv
             }
 
             x.Append(']');
-            
+
         }
         public void Accept(DArray type, StringBuilder x)
         {
