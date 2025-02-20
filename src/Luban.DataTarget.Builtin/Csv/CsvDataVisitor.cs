@@ -79,7 +79,7 @@ namespace Luban.DataExporter.Builtin.Csv
 
             var item = t.DefEnum.Items.First(f => f.IntValue == type.Value);
 
-            x.Append(item.IntValue);
+            x.Append(item.Name);
         }
 
         public void Accept(DString type, StringBuilder x)
