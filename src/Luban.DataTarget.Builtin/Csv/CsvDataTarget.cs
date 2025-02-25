@@ -83,7 +83,7 @@ namespace Luban.DataExporter.Builtin.Csv
                         }
                         else
                         {
-                            throw new Exception($"map headType为空");
+                            throw new Exception($"{field.Name} map headType为空");
                         }
                     }
 
@@ -108,7 +108,7 @@ namespace Luban.DataExporter.Builtin.Csv
                 }
             }
         }
-        public void WriteRecords(List<Record> records, StringBuilder sb, CsvDataVisitor csvDataVisitor)
+        void WriteRecords(List<Record> records, StringBuilder sb, CsvDataVisitor csvDataVisitor)
         {
             foreach (var record in records)
             {
@@ -124,34 +124,41 @@ namespace Luban.DataExporter.Builtin.Csv
                 {
                     var defField = defFields[index++];
 
-                    if (dType != null && defField.NeedExport())
+                    if (defField.NeedExport())
                     {
-                        bool needWarp = defField.CType.IsCollection;
-
-                        if (dType is DBean bean)
+                        if(dType != null)
                         {
-                            var set = bean.TType.DefBean.CsvSet;
+                            bool needWarp = defField.CType.IsCollection;
 
-                            var headType = CsvSet.GetHeadType(set);
-
-                            if (headType.StartsWith("json"))
+                            if (dType is DBean bean)
                             {
-                                needWarp = true;
+                                var set = bean.TType.DefBean.CsvSet;
+
+                                var headType = CsvSet.GetHeadType(set);
+
+                                if (headType.StartsWith("json"))
+                                {
+                                    needWarp = true;
+                                }
                             }
-                        }
 
-                        if (needWarp)
+                            if (needWarp)
+                            {
+                                sb.Append('"');
+                            }
+                            dType.Apply(csvDataVisitor, sb);
+
+                            if (needWarp)
+                            {
+                                sb.Append('"');
+                            }
+
+                            sb.Append(',');
+                        }
+                        else
                         {
-                            sb.Append('"');
+                            throw new Exception($"可空字段{defField.Name}没有有效值（不可为空）");
                         }
-                        dType.Apply(csvDataVisitor, sb);
-
-                        if (needWarp)
-                        {
-                            sb.Append('"');
-                        }
-
-                        sb.Append(',');
                     }
                 }
 
