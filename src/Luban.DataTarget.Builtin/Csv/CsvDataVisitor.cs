@@ -77,9 +77,16 @@ namespace Luban.DataExporter.Builtin.Csv
         {
             var t = type.Type;
 
-            var item = t.DefEnum.Items.First(f => f.IntValue == type.Value);
-
-            x.Append(item.Name);
+            var item = t.DefEnum.Items.Find(f => f.IntValue == type.Value);
+            if (item != null)
+            {
+                x.Append(item.Name);
+            }
+            else
+            {
+                throw new Exception($"未能在Enum {t.DefEnum.Name}中找到{type.Value}对应的值");
+            }
+          
         }
 
         public void Accept(DString type, StringBuilder x)
