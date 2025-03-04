@@ -1,7 +1,5 @@
-LubanSchema = 
-{
-    enums =
-    {
+schema = {
+    enums = {
         {{~ for c in __enums ~}}
         ---@class {{c.full_name}} {{-if c.comment != ''}} @{{escape_comment c.comment}}{{end}}
         {{~ for item in c.items ~}}
@@ -10,6 +8,5 @@ LubanSchema =
         {{c.full_name}} = {  {{ for item in c.items }} {{item.name}}={{item.int_value}}, {{end}} };
         {{~end~}}
     }
-}
-
-return LubanSchema
+};
+return schema;
