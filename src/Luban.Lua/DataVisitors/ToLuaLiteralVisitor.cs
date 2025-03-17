@@ -47,13 +47,21 @@ public class ToLuaLiteralVisitor : ToLiteralVisitorBase
 
     private void Append(List<DType> datas, StringBuilder x)
     {
-        x.Append('{');
-        foreach (var e in datas)
+        var count = datas.Count;
+        if (count == 0)
         {
-            x.Append(e.Apply(this));
-            x.Append(',');
+            x.Append('{');
+            foreach (var e in datas)
+            {
+                x.Append(e.Apply(this));
+                x.Append(',');
+            }
+            x.Append('}');
         }
-        x.Append('}');
+        else
+        {
+            x.Append("nil");
+        }
     }
 
     public override string Accept(DArray type)
