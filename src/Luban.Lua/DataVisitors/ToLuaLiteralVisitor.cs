@@ -48,7 +48,7 @@ public class ToLuaLiteralVisitor : ToLiteralVisitorBase
     private void Append(List<DType> datas, StringBuilder x)
     {
         var count = datas.Count;
-        if (count == 0)
+        if (count != 0)
         {
             x.Append('{');
             foreach (var e in datas)
