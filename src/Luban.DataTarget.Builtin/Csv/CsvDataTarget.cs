@@ -157,7 +157,7 @@ namespace Luban.DataExporter.Builtin.Csv
                         }
                         else
                         {
-                            throw new Exception($"可空字段{defField.Name}没有有效值（不可为空）");
+                            sb.Append(',');
                         }
                     }
                 }

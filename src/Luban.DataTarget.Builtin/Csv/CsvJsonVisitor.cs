@@ -87,7 +87,7 @@ namespace Luban.DataExporter.Builtin.Csv
                             hasElement = map.Datas.Count > 0;
                         }
                     }
-                    if (hasElement)
+                    if (field != null && hasElement)
                     {
                         x.WritePropertyName(defFields.Name);
 
