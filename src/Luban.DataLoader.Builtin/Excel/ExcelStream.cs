@@ -3,7 +3,7 @@ using Luban.DataLoader.Builtin.Utils;
 
 namespace Luban.DataLoader.Builtin.Excel;
 
-class ExcelStream
+public class ExcelStream
 {
 
     private readonly List<Cell> _datas;
@@ -15,6 +15,7 @@ class ExcelStream
     public ExcelStream(List<Cell> datas, int fromIndex, int toIndex, string sep, string overrideDefault)
     {
         _overrideDefault = overrideDefault;
+        toIndex = Math.Min(toIndex, datas.Count - 1);
         if (string.IsNullOrWhiteSpace(sep))
         {
             if (string.IsNullOrEmpty(overrideDefault))
@@ -110,7 +111,7 @@ class ExcelStream
             {
                 foreach (var row in rows)
                 {
-                    for (int i = fromIndex; i <= toIndex; i++)
+                    for (int i = fromIndex; i <= toIndex && i < row.Count; i++)
                     {
                         this._datas.Add(row[i]);
                     }
@@ -126,7 +127,7 @@ class ExcelStream
         {
             foreach (var row in rows)
             {
-                for (int i = fromIndex; i <= toIndex; i++)
+                for (int i = fromIndex; i <= toIndex && i < row.Count; i++)
                 {
                     var cell = row[i];
                     object d = cell.Value;
@@ -190,7 +191,7 @@ class ExcelStream
         return false;
     }
 
-    public bool TryPeed(out object data)
+    public bool TryPeek(out object data)
     {
         int oldCurIndex = _curIndex;
         if (TryRead(out data))
@@ -260,7 +261,7 @@ class ExcelStream
 
     private bool IsSkip(object x)
     {
-        return x == null || (x is string s && string.IsNullOrEmpty(s));
+        return x == null || (x is string s && string.IsNullOrWhiteSpace(s));
     }
 
     public bool TryReadEOF()
