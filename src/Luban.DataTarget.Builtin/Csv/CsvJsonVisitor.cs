@@ -127,7 +127,7 @@ namespace Luban.DataExporter.Builtin.Csv
         {
             x.WriteStartObject();
 
-            foreach (var pair in type.Datas)//字典以key作字段名
+            foreach (var pair in type.DataMap)//字典以key作字段名
             {
                 var key = pair.Key;
                 if (key is DString str)

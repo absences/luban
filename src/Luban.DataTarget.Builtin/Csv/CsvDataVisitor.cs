@@ -200,7 +200,7 @@ namespace Luban.DataExporter.Builtin.Csv
 
             x.Append('{');
 
-            foreach (var d in type.Datas)
+            foreach (var d in type.DataMap)
             {
                 d.Key.Apply(this, x);
 
