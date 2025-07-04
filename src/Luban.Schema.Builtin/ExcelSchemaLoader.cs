@@ -43,6 +43,7 @@ public class ExcelSchemaLoader : SchemaLoaderBase
             Name = "__TableRecord__",
             Parent = "",
             Alias = "",
+            CsvSet = "",
             IsValueType = false,
             Sep = "",
             Fields = new List<RawField>
@@ -116,6 +117,7 @@ public class ExcelSchemaLoader : SchemaLoaderBase
             Name = "__EnumItem__",
             Parent = "",
             Alias = "",
+            CsvSet = "",
             IsValueType = false,
             Sep = "",
             Fields = new List<RawField>
@@ -141,6 +143,7 @@ public class ExcelSchemaLoader : SchemaLoaderBase
             Name = "__EnumInfo__",
             Parent = "",
             Alias = "",
+            CsvSet = "",
             IsValueType = false,
             Sep = "",
             Fields = new List<RawField>
@@ -215,6 +218,7 @@ public class ExcelSchemaLoader : SchemaLoaderBase
             Name = "__FieldInfo__",
             Parent = "",
             Alias = "",
+            CsvSet = "",
             IsValueType = false,
             Sep = "",
             Fields = new List<RawField>
@@ -244,6 +248,7 @@ public class ExcelSchemaLoader : SchemaLoaderBase
             Name = "__BeanInfo__",
             Parent = "",
             Alias = "",
+            CsvSet = "",
             IsValueType = false,
             Sep = "",
             Fields = new List<RawField>
@@ -253,6 +258,7 @@ public class ExcelSchemaLoader : SchemaLoaderBase
                 new() { Name = "valueType", Type = "bool" },
                 new() { Name = "sep", Type = "string" },
                 new() { Name = "alias", Type = "string" },
+                new() { Name = "csv_set", Type = "string" },
                 new() { Name = "comment", Type = "string" },
                 new() { Name = "tags", Type = "string" },
                 new() { Name = "group", Type = "string" },
@@ -285,6 +291,7 @@ public class ExcelSchemaLoader : SchemaLoaderBase
             string parent = (data.GetField("parent") as DString).Value.Trim();
             string sep = (data.GetField("sep") as DString).Value.Trim();
             string alias = (data.GetField("alias") as DString).Value.Trim();
+            string csv_set = (data.GetField("csv_set") as DString).Value.Trim();
             string comment = (data.GetField("comment") as DString).Value.Trim();
             string tags = (data.GetField("tags") as DString).Value.Trim();
             string group = (data.GetField("group") as DString).Value.Trim();
@@ -296,6 +303,7 @@ public class ExcelSchemaLoader : SchemaLoaderBase
                 IsValueType = ((DBool)data.GetField("valueType")).Value,
                 Sep = sep,
                 Alias = alias,
+                CsvSet = csv_set,
                 Comment = comment,
                 Tags = DefUtil.ParseAttrs(tags),
                 Groups = SchemaLoaderUtil.CreateGroups(group),

@@ -373,7 +373,8 @@ public class DefAssembly
                 return TString.Create(nullable, tags);
             case "text":
                 tags.Add("text", "1");
-                return TString.Create(nullable, tags);
+                //return TString.Create(nullable, tags);
+                return TInt.Create(nullable, tags);
             case "time":
             case "datetime":
                 return TDateTime.Create(nullable, tags);

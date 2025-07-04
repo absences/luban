@@ -44,6 +44,8 @@ public class DefBean : DefTypeBase
 
     public string Alias { get; }
 
+    public string CsvSet { get; }
+
     public bool IsMultiRow { get; set; }
 
     public string Sep { get; }
@@ -85,6 +87,7 @@ public class DefBean : DefTypeBase
         Id = TypeUtil.ComputeCfgHashIdByName(FullName);
         Comment = b.Comment;
         Tags = b.Tags;
+        CsvSet = b.CsvSet;
         foreach (var field in b.Fields)
         {
             Fields.Add(CreateField(field, 0));

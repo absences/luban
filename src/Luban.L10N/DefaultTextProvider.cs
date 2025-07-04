@@ -77,6 +77,7 @@ public class DefaultTextProvider : ITextProvider
             Name = "__TextInfo__",
             Parent = "",
             Alias = "",
+            CsvSet = "",
             IsValueType = false,
             Sep = "",
             Fields = rawFields,

@@ -68,7 +68,7 @@ public class XmlSchemaLoader : SchemaLoaderBase
         }
     }
 
-    private static readonly List<string> _enumOptionalAttrs = new() { "flags", "comment", "tags", "unique", "group" };
+    private static readonly List<string> _enumOptionalAttrs = new() { "flags", "comment", "tags", "unique", "group", "csv_set"};
     private static readonly List<string> _enumRequiredAttrs = new() { "name" };
 
     private static readonly List<string> _enumItemOptionalAttrs = new() { "value", "alias", "comment", "tags" };
@@ -229,6 +229,7 @@ public class XmlSchemaLoader : SchemaLoaderBase
             Parent = parent,
             IsValueType = XmlUtil.GetOptionBoolAttribute(e, "valueType"),
             Alias = XmlUtil.GetOptionalAttribute(e, "alias"),
+            CsvSet = XmlUtil.GetOptionalAttribute(e, "csv_set"),
             Sep = XmlUtil.GetOptionalAttribute(e, "sep"),
             Comment = XmlUtil.GetOptionalAttribute(e, "comment"),
             Tags = DefUtil.ParseAttrs(XmlUtil.GetOptionalAttribute(e, "tags")),

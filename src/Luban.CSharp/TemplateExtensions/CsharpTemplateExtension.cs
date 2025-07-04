@@ -8,7 +8,11 @@ using Scriban.Runtime;
 namespace Luban.CSharp.TemplateExtensions;
 
 public class CsharpTemplateExtension : ScriptObject
-{
+{   
+    public static bool DeclaringTypeIsInt(TType type)
+    {
+        return type is TInt;
+    }
     public static string DeclaringTypeName(TType type)
     {
         return type.Apply(DeclaringTypeNameVisitor.Ins);
