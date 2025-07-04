@@ -68,7 +68,7 @@ public class XmlSchemaLoader : SchemaLoaderBase
         }
     }
 
-    private static readonly List<string> _enumOptionalAttrs = new() { "flags", "comment", "tags", "unique", "group", "csv_set"};
+    private static readonly List<string> _enumOptionalAttrs = new() { "flags", "comment", "tags", "unique", "group"};
     private static readonly List<string> _enumRequiredAttrs = new() { "name" };
 
     private static readonly List<string> _enumItemOptionalAttrs = new() { "value", "alias", "comment", "tags" };
