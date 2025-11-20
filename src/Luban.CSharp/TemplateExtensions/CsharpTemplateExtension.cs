@@ -29,10 +29,11 @@ namespace Luban.CSharp.TemplateExtensions;
 
 public class CsharpTemplateExtension : ScriptObject
 {
-    public static bool DeclaringTypeIsInt(TType type)
+    public static bool DeclaringTypeIsLong(TType type)
     {
-        return type is TInt;
+        return type is TLong || type is TInt;
     }
+
     public static string DeclaringTypeName(TType type)
     {
         return type.Apply(DeclaringTypeNameVisitor.Ins);
