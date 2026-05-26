@@ -22,19 +22,20 @@ Luban standardizes the game configuration development workflow, which can greatl
 - Rich export formats. Support generating binary, json, bson, xml, lua, yaml and other format data
 - Enhanced excel format. Simple configurations such as simple lists, substructures, structured lists, and arbitrarily complex deep nested structures can be concisely configured
 - Complete type system. Not only can it express common specification line lists, but it can flexibly and elegantly express complex GamePlay data such as behavior trees, skills, plots, and dungeons because **supports OOP type inheritance**
-- Support multiple languages. Supports generating language codes such as c#, java, go, cpp, lua, python, typescript, php, rust, etc.
+- Support multiple languages. Supports generating language codes such as c#, java, go, cpp, lua, python, javascript, typescript, php, rust, godot, etc.
 - Support popular message schemes. protobuf(schema + binary + json), flatbuffers(schema + json), msgpack(binary)
 - Powerful data verification capability. ref reference check, path resource path, range range check, etc.
 - Perfect localization support
 - Supports all major game engines and platforms. Support Unity, Unreal, Cocos2x, Godot, WeChat games, etc.
 - Good cross-platform capability. It can run well on Win, Linux, and Mac platforms.
 - Support all mainstream hot update solutions. hybridclr, ilruntime, {x,t,s}lua, puerts, etc.
+- The generated code makes no reflection API calls, ensuring compatibility with common code obfuscation and hardening tools such as [Obfuz](https://github.com/focus-creative-games/obfuz), Obfuscator, Confuser, and .NET Refactor.
 - Clear and elegant generation pipeline, it is easy to carry out secondary development on the basis of luban, and customize a configuration tool suitable for your own project style.
 
 ## Documentation
 
-- [Official Documentation](https://luban.doc.code-philosophy.com/)
-- [Quick Start](https://luban.doc.code-philosophy.com/docs/beginner/quickstart)
+- [Official Documentation](https://www.datable.cn/)
+- [Quick Start](https://www.datable.cn/docs/beginner/quickstart)
 - **Example Project** ([github](https://github.com/focus-creative-games/luban_examples)) ([gitee](https://gitee.com/focus-creative-games/luban_examples) )
 
 ## Support and contact

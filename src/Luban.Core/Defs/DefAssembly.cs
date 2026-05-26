@@ -1,3 +1,23 @@
+// Copyright 2025 Code Philosophy
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 using Luban.RawDefs;
 using Luban.Types;
 using Luban.Utils;
@@ -13,6 +33,8 @@ public class DefAssembly
     public List<DefTypeBase> TypeList { get; } = new();
 
     private readonly Dictionary<string, DefTypeBase> _notCaseSenseTypes = new();
+
+    private readonly Dictionary<string, string> _constAliases = new();
 
     private readonly HashSet<string> _namespaces = new();
 
@@ -59,6 +81,11 @@ public class DefAssembly
         return _variants.TryGetValue("default", out variantName);
     }
 
+    public bool TryGetConstAlias(string alias, out string value)
+    {
+        return _constAliases.TryGetValue(alias, out value);
+    }
+
     public DefAssembly(RawAssembly assembly, string target, List<string> outputTables, List<RawGroup> groupDefs, Dictionary<string, string> variants)
     {
         _targets = assembly.Targets;
@@ -67,7 +94,19 @@ public class DefAssembly
         {
             throw new Exception($"target:{target} is invalid");
         }
+        foreach (var g in Target.Groups)
+        {
+            if (groupDefs.All(d => !d.Names.Contains(g)))
+            {
+                throw new Exception($"target:{target} group:`{g}` not defined");
+            }
+        }
         _variants = variants;
+
+        foreach (var c in assembly.ConstAliases)
+        {
+            _constAliases.Add(c.Key, c.Value);
+        }
 
         foreach (var g in assembly.RefGroups)
         {

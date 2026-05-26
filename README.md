@@ -22,29 +22,27 @@ luban标准化了游戏配置开发工作流，可以极大提升策划和程序
 - 丰富的导出格式。 支持生成binary、json、bson、xml、lua、yaml等格式数据
 - 增强的excel格式。可以简洁地配置出像简单列表、子结构、结构列表，以及任意复杂的深层次的嵌套结构
 - 完备的类型系统。不仅能表达常见的规范行列表，由于**支持OOP类型继承**，能灵活优雅表达行为树、技能、剧情、副本之类复杂GamePlay数据
-- 支持多种的语言。内置支持生成c#、java、go、cpp、lua、python、typescript、rust、php、erlang 等语言代码，同时还能通过protobuf之类消息方案支持其他语言
+- 支持多种的语言。内置支持生成c#、java、go、cpp、lua、python、javascript、typescript、rust、php、erlang、godot 等语言代码，同时还能通过protobuf之类消息方案支持其他语言
 - 支持主流的消息方案。 protobuf(schema + binary + json)、flatbuffers(schema + json)、msgpack(binary)
 - 强大的数据校验能力。ref引用检查、path资源路径、range范围检查等等
 - 完善的本地化支持
 - 支持所有主流的游戏引擎和平台。支持Unity、Unreal、Cocos2x、Godot、微信小游戏等
 - 良好的跨平台能力。能在Win,Linux,Mac平台良好运行。
 - 支持所有主流的热更新方案。hybridclr、ilruntime、{x,t,s}lua、puerts等
+- 生成的代码未调用任何反射接口，兼容[Obfuz](https://github.com/focus-creative-games/obfuz)、Obfuscator、Confuser、.Net Refactor等常见代码混淆和加固工具。
 - 清晰优雅的生成管线，很容易在luban基础上进行二次开发，定制出适合自己项目风格的配置工具。
 
 ## 文档
 
-- [官方文档](https://luban.doc.code-philosophy.com/)
-- [快速上手](https://luban.doc.code-philosophy.com/docs/beginner/quickstart)
+- [官方文档](https://www.datable.cn/)
+- [快速上手](https://www.datable.cn/docs/beginner/quickstart)
 - **示例项目** ([github](https://github.com/focus-creative-games/luban_examples)) ([gitee](https://gitee.com/focus-creative-games/luban_examples))
-
 
 ## 支持与联系
 
 - QQ群: 692890842 （Luban开发交流群）
-- discord: https://discord.gg/dGY4zzGMJ4
-- 邮箱: luban@code-philosophy.com
-
-
+- discord: <https://discord.gg/dGY4zzGMJ4>
+- 邮箱: <luban@code-philosophy.com>
 
 ## license
 

@@ -1,4 +1,24 @@
-﻿namespace Luban.DataValidator.Builtin.Range;
+// Copyright 2025 Code Philosophy
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
+namespace Luban.DataValidator.Builtin.Range;
 
 public class DoubleRange
 {
@@ -61,11 +81,11 @@ public class DoubleRange
         {
             throw new Exception($"range定义不合法");
         }
-        if (_min != (int)_min)
+        if (_min != null && _min != (long)_min)
         {
             _min -= 1e-6;
         }
-        if (_max != (int)_max)
+        if (_max != null && _max != (long)_max)
         {
             _max += 1e-6;
         }

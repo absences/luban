@@ -1,7 +1,27 @@
-using System.Text;
+// Copyright 2025 Code Philosophy
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 using Luban.Datas;
 using Luban.Defs;
 using Luban.Types;
+using System.Text;
 
 namespace Luban.Utils;
 
@@ -45,6 +65,31 @@ public static class DataUtil
         stream.Seek(0, SeekOrigin.Begin);
         stream.Read(bytes, 0, bytes.Length);
         return bytes;
+    }
+
+    public static string RemoveStringQuote(string s)
+    {
+        if (s.Length == 0)
+        {
+            return s;
+        }
+        if (s[0] == '\'')
+        {
+            if (s.Length == 1 || s[s.Length - 1] != '\'')
+            {
+                throw new Exception($"bad string:`{s}`");
+            }
+            return s.Substring(1, s.Length - 2);
+        }
+        else if (s[0] == '\"')
+        {
+            if (s.Length == 1 || s[s.Length - 1] != '\"')
+            {
+                throw new Exception($"bad string:`{s}`");
+            }
+            return s.Substring(1, s.Length - 2);
+        }
+        return s;
     }
 
     public static string UnEscapeRawString(string s)

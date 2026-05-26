@@ -1,8 +1,28 @@
-using System.Text;
+// Copyright 2025 Code Philosophy
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 using Luban.DataLoader.Builtin.DataVisitors;
 using Luban.Datas;
 using Luban.Defs;
 using Luban.Types;
+using System.Text;
 
 namespace Luban.DataLoader.Builtin.Utils;
 
@@ -271,6 +291,100 @@ static class LoadDataUtil
             default:
                 throw new InvalidExcelDataException($"{s} 不是 bool 类型的值 (true|1|y|yes 或 false|0|n|no)");
         }
+    }
+
+    public static bool TryParseExcelByteFromNumberOrConstAlias(string s, out byte value)
+    {
+        s = s.Trim();
+        if (byte.TryParse(s, out value))
+        {
+            return true;
+        }
+        DefAssembly assembly = GenerationContext.Current.Assembly;
+        if (assembly.TryGetConstAlias(s, out var constValue) && byte.TryParse(constValue, out value))
+        {
+            return true;
+        }
+        return false;
+    }
+
+    public static bool TryParseExcelShortFromNumberOrConstAlias(string s, out short value)
+    {
+        s = s.Trim();
+        if (short.TryParse(s, out value))
+        {
+            return true;
+        }
+        DefAssembly assembly = GenerationContext.Current.Assembly;
+        if (assembly.TryGetConstAlias(s, out var constValue) && short.TryParse(constValue, out value))
+        {
+            return true;
+        }
+        return false;
+    }
+
+    public static bool TryParseExcelIntFromNumberOrConstAlias(string s, out int value)
+    {
+        s = s.Trim();
+        if (s.StartsWith("0x") || s.StartsWith("0X"))
+        {
+            return int.TryParse(s.Substring(2), System.Globalization.NumberStyles.HexNumber, null, out value);
+        }
+        if (int.TryParse(s, out value))
+        {
+            return true;
+        }
+        DefAssembly assembly = GenerationContext.Current.Assembly;
+        if (assembly.TryGetConstAlias(s, out var constValue) && int.TryParse(constValue, out value))
+        {
+            return true;
+        }
+        return false;
+    }
+
+    public static bool TryParseExcelLongFromNumberOrConstAlias(string s, out long value)
+    {
+        s = s.Trim();
+        if (long.TryParse(s, out value))
+        {
+            return true;
+        }
+        DefAssembly assembly = GenerationContext.Current.Assembly;
+        if (assembly.TryGetConstAlias(s, out var constValue) && long.TryParse(constValue, out value))
+        {
+            return true;
+        }
+        return false;
+    }
+
+    public static bool TryParseExcelFloatFromNumberOrConstAlias(string s, out float value)
+    {
+        s = s.Trim();
+        if (float.TryParse(s, out value))
+        {
+            return true;
+        }
+        DefAssembly assembly = GenerationContext.Current.Assembly;
+        if (assembly.TryGetConstAlias(s, out var constValue) && float.TryParse(constValue, out value))
+        {
+            return true;
+        }
+        return false;
+    }
+
+    public static bool TryParseExcelDoubleFromNumberOrConstAlias(string s, out double value)
+    {
+        s = s.Trim();
+        if (double.TryParse(s, out value))
+        {
+            return true;
+        }
+        DefAssembly assembly = GenerationContext.Current.Assembly;
+        if (assembly.TryGetConstAlias(s, out var constValue) && double.TryParse(constValue, out value))
+        {
+            return true;
+        }
+        return false;
     }
 
     //public static string Data2String(DType data)
