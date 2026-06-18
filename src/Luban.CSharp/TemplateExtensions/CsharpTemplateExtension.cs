@@ -29,7 +29,7 @@ public class CsharpTemplateExtension : ScriptObject
 {
     public static bool DeclaringTypeIsLong(TType type)
     {
-        return type is TLong || type is TInt;
+        return type is TLong;
     }
 
     public static string DeclaringTypeName(TType type)
