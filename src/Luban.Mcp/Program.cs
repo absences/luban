@@ -1,4 +1,4 @@
-// Copyright 2025 Code Philosophy
+// Copyright 2026 Code Philosophy
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -18,19 +18,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-namespace Luban.DataLoader.Builtin.DataVisitors;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using ModelContextProtocol.Server;
 
-class InvalidExcelDataException : Exception
-{
-    public InvalidExcelDataException()
-    {
-    }
-
-    public InvalidExcelDataException(string message) : base(message)
-    {
-    }
-
-    public InvalidExcelDataException(string message, Exception innerException) : base(message, innerException)
-    {
-    }
-}
+var builder = Host.CreateApplicationBuilder(args);
+builder.Logging.AddConsole(o => o.LogToStandardErrorThreshold = LogLevel.Trace);
+builder.Services
+    .AddMcpServer()
+    .WithStdioServerTransport()
+    .WithToolsFromAssembly();
+await builder.Build().RunAsync();
