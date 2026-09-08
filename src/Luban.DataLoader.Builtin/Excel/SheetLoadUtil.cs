@@ -19,7 +19,9 @@
 // SOFTWARE.
 
 using ExcelDataReader;
+using Luban.Diagnostics;
 using Luban.Utils;
+using System.Data.Common;
 
 namespace Luban.DataLoader.Builtin.Excel;
 
@@ -44,6 +46,26 @@ public static class SheetLoadUtil
         }
     }
 
+    public static IExcelDataReader CreateSheetReader(string ext, Stream stream)
+    {
+        switch (ext)
+        {
+            case ".csv":
+            case ".tsv":
+            {
+                var config = new ExcelReaderConfiguration() { FallbackEncoding = DetectCsvEncoding(stream) };
+                if (ext == ".tsv")
+                {
+                    // tsv 的分隔符固定为 tab，不参与 csv 的多分隔符自动探测
+                    config.AutodetectSeparators = new[] { '\t' };
+                }
+                return ExcelReaderFactory.CreateCsvReader(stream, config);
+            }
+            default:
+                return ExcelReaderFactory.CreateReader(stream);
+        }
+    }
+
     private static readonly AsyncLocal<string> s_curExcel = new();
 
     public static IEnumerable<RawSheet> LoadRawSheets(string rawUrl, string sheetName, Stream stream)
@@ -51,7 +73,7 @@ public static class SheetLoadUtil
         s_logger.Trace("{filename} {sheet}", rawUrl, sheetName);
         s_curExcel.Value = rawUrl;
         string ext = Path.GetExtension(rawUrl);
-        using (var reader = ext != ".csv" ? ExcelReaderFactory.CreateReader(stream) : ExcelReaderFactory.CreateCsvReader(stream, new ExcelReaderConfiguration() { FallbackEncoding = DetectCsvEncoding(stream) }))
+        using (var reader = CreateSheetReader(ext, stream))
         {
             do
             {
@@ -64,7 +86,7 @@ public static class SheetLoadUtil
                     }
                     catch (Exception e)
                     {
-                        throw new Exception($"excel:{rawUrl} sheet:{reader.Name} 读取失败.", e);
+                        throw new LubanException(e, "error.excel.read_fail", rawUrl, reader.Name);
                     }
                     if (sheet != null)
                     {
@@ -126,7 +148,7 @@ public static class SheetLoadUtil
             {
                 if (!s_knownSpecialTags.Contains(tag))
                 {
-                    s_logger.Error("文件:'{}' 行标签:'{}' 包含未知tag:'{}'，是否有拼写错误?", s_curExcel.Value, rowTag, tag);
+                    s_logger.Error(MessageCatalog.Format("warn.excel.unknown_row_tag", s_curExcel.Value, rowTag, tag));
                 }
             }
         }
@@ -134,7 +156,7 @@ public static class SheetLoadUtil
 
     private static bool IsNotDataRow(List<Cell> row)
     {
-        if (row.Count == 0)
+        if (IsEmptyRow(row))
         {
             return true;
         }
@@ -155,7 +177,7 @@ public static class SheetLoadUtil
 
         if (!TryFindTopTitle(cells, out var topTitleRowIndex))
         {
-            throw new Exception($"没有定义任何有效 标题行");
+            throw new LubanException("error.excel.no_title_row");
         }
         //titleRowNum = GetTitleRowNum(mergeCells, orientRow);
 
@@ -165,7 +187,7 @@ public static class SheetLoadUtil
 
         if (rootTitle.SubTitleList.Count == 0)
         {
-            throw new Exception($"没有定义任何有效 列");
+            throw new LubanException("error.excel.no_column");
         }
         return rootTitle;
     }
@@ -186,7 +208,7 @@ public static class SheetLoadUtil
             }
             if (rowTag.Substring(2).IndexOf('&') >= 0)
             {
-                throw new Exception($"excel标题头不再使用'&'作为分割符，请改为'{s_sep}'");
+                throw new LubanException("error.excel.ampersand_separator", s_sep);
             }
             var tags = StringUtil.SplitStringWithEscape(rowTag.Substring(2), s_sep).Select(s => s.Trim()).Where(s => !string.IsNullOrEmpty(s)).ToList();
             if (tags.Contains("field") || tags.Contains("var") || tags.Contains("+"))
@@ -238,7 +260,7 @@ public static class SheetLoadUtil
     {
         if (nameAndAttrs.Contains('&'))
         {
-            throw new Exception($"excel标题头不再使用'&'作为分割符，请改为'{s_sep}'");
+            throw new LubanException("error.excel.ampersand_separator", s_sep);
         }
         var attrs = StringUtil.SplitStringWithEscape(nameAndAttrs, s_sep);
 
@@ -270,7 +292,7 @@ public static class SheetLoadUtil
             var pairs = attrPair.Split('=');
             if (pairs.Length != 2)
             {
-                throw new Exception($"invalid title: {nameAndAttrs}");
+                throw new LubanException("error.excel.invalid_title", nameAndAttrs);
             }
             tags.Add(pairs[0].Trim(), pairs[1].Trim());
         }
@@ -360,14 +382,14 @@ public static class SheetLoadUtil
                     }
                     if (!endNamePair.EndsWith(']') || endNamePair[0..^1] != titleName)
                     {
-                        throw new Exception($"列:'[{titleName}' 后第一个有效列必须为匹配 '{titleName}]'，却发现:'{endNamePair}'");
+                        throw new LubanException("error.excel.group_end_mismatch", titleName, endNamePair);
                     }
                     findEndPair = true;
                     break;
                 }
                 if (!findEndPair)
                 {
-                    throw new Exception($"列:'[{titleName}' 未找到结束匹配列 '{titleName}]'");
+                    throw new LubanException("error.excel.group_end_missing", titleName);
                 }
                 // 处理 * 前缀（multi_rows 标记）
                 if (titleName.StartsWith('*'))
@@ -383,7 +405,7 @@ public static class SheetLoadUtil
                 {
                     if (subTitle.FromIndex != i)
                     {
-                        throw new Exception($"列:{titleName} 重复");
+                        throw new LubanException("error.excel.duplicate_column", titleName);
                     }
                     else
                     {
@@ -411,7 +433,7 @@ public static class SheetLoadUtil
         }
         if (metaStr.Substring(2).Contains('&'))
         {
-            throw new Exception($"excel标题头不再使用'&'作为分割符，请改为'{s_sep}'");
+            throw new LubanException("error.excel.ampersand_separator", s_sep);
         }
         foreach (var attr in StringUtil.SplitStringWithEscape(metaStr.Substring(2), s_sep))
         {
@@ -440,7 +462,7 @@ public static class SheetLoadUtil
                 }
                 default:
                 {
-                    throw new Exception($"非法单元薄 meta 属性定义 {attr}, 合法属性有: +,var,row,column,table=<tableName>");
+                    throw new LubanException("error.excel.invalid_meta", attr);
                 }
             }
         }
@@ -489,7 +511,7 @@ public static class SheetLoadUtil
 
     private static bool IsEmptyRow(List<Cell> row)
     {
-        return row.All(c => string.IsNullOrWhiteSpace(c.Value?.ToString()));
+        return row.All(c => c.Value == null || c.Value is InvalidExcelValue || string.IsNullOrWhiteSpace(c.Value.ToString()));
     }
 
     const int maxEmptyRowCount = 300;
@@ -509,7 +531,17 @@ public static class SheetLoadUtil
             var row = new List<Cell>();
             for (int i = 0, n = reader.FieldCount; i < n; i++)
             {
-                row.Add(new Cell(rowIndex, i, reader.GetValue(i)));
+                object value;
+                CellError? cellError = reader.GetCellError(i);
+                if (cellError != null)
+                {
+                    value = new InvalidExcelValue(rowIndex, i, cellError.Value);
+                }
+                else
+                {
+                    value = reader.GetValue(i);
+                }
+                row.Add(new Cell(rowIndex, i, value));
             }
             ++rowIndex;
             if (IsEmptyRow(row))
@@ -517,7 +549,7 @@ public static class SheetLoadUtil
                 ++emptyRowCount;
                 if (emptyRowCount == maxEmptyRowCount)
                 {
-                    s_logger.Warn("excel:{filename} sheet:{sheet} 连续空行超过{}行，删除这些空行可以提升导出性能", s_curExcel.Value, reader.Name, maxEmptyRowCount);
+                    s_logger.Warn(MessageCatalog.Format("warn.excel.too_many_empty_rows", s_curExcel.Value, reader.Name, maxEmptyRowCount));
                 }
             }
             else
@@ -559,7 +591,7 @@ public static class SheetLoadUtil
     {
         s_logger.Trace("{filename} {sheet}", rawUrl, sheetName);
         string ext = Path.GetExtension(rawUrl);
-        using (var reader = ext != ".csv" ? ExcelReaderFactory.CreateReader(stream) : ExcelReaderFactory.CreateCsvReader(stream, new ExcelReaderConfiguration() { FallbackEncoding = DetectCsvEncoding(stream) }))
+        using (var reader = CreateSheetReader(ext, stream))
         {
             do
             {
@@ -575,13 +607,13 @@ public static class SheetLoadUtil
                     }
                     catch (Exception e)
                     {
-                        throw new Exception($"excel:{rawUrl} sheet:{reader.Name} 读取失败.", e);
+                        throw new LubanException(e, "error.excel.read_fail", rawUrl, reader.Name);
                     }
 
                 }
             } while (reader.NextResult());
         }
-        throw new Exception($"excel:{rawUrl} sheet:{sheetName} 没有找到有效的表定义");
+        throw new LubanException("error.excel.no_table_def", rawUrl, sheetName);
     }
 
     private static RawSheetTableDefInfo ParseSheetTableDefInfo(string rawUrl, IExcelDataReader reader)
@@ -599,7 +631,7 @@ public static class SheetLoadUtil
 
         if (typeRowIndex < 0)
         {
-            throw new Exception($"缺失type行。请用'##type'标识type行");
+            throw new LubanException("error.excel.missing_type_row");
         }
         List<Cell> typeRow = cells[typeRowIndex];
 

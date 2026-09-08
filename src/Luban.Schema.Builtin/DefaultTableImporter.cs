@@ -34,12 +34,12 @@ public class DefaultTableImporter : ITableImporter
     {
         string dataDir = GenerationContext.GlobalConf.InputDataDir;
 
-        string fileNamePatternStr = EnvManager.Current.GetOptionOrDefault("tableImporter", "filePattern", false, "#([a-zA-Z0-9-.]+)(-.*)?$");
+        string fileNamePatternStr = EnvManager.Current.GetOptionOrDefault("tableImporter", "filePattern", false, "#([a-zA-Z0-9-._]+)(-.*)?$");
         string tableNamespaceFormatStr = EnvManager.Current.GetOptionOrDefault("tableImporter", "tableNamespaceFormat", false, "{0}");
         string tableNameFormatStr = EnvManager.Current.GetOptionOrDefault("tableImporter", "tableNameFormat", false, "Tb{0}");
         string valueTypeNameFormatStr = EnvManager.Current.GetOptionOrDefault("tableImporter", "valueTypeNameFormat", false, "{0}");
         var fileNamePattern = new Regex(fileNamePatternStr);
-        var excelExts = new HashSet<string> { "xlsx", "xls", "xlsm", "csv" };
+        var excelExts = new HashSet<string> { "xlsx", "xls", "xlsm", "csv", "tsv" };
 
         var tables = new List<RawTable>();
         foreach (string file in Directory.GetFiles(dataDir, "*", SearchOption.AllDirectories))

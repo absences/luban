@@ -18,9 +18,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+using Luban.Diagnostics;
 using Luban.RawDefs;
 using Luban.Types;
 using Luban.TypeVisitors;
+using Luban.Utils;
 using Luban.Validator;
 
 namespace Luban.Defs;
@@ -92,7 +94,7 @@ public class DefTable : DefTypeBase
 
         if ((ValueTType = (TBean)ass.CreateType(Namespace, ValueType, false)) == null)
         {
-            throw new Exception($"table:'{FullName}' 的 value类型:'{ValueType}' 不存在");
+            throw new LubanException("error.def.table.value_type_not_exist", FullName, ValueType);
         }
 
         switch (Mode)
@@ -111,21 +113,31 @@ public class DefTable : DefTypeBase
                 {
                     if (ValueTType.DefBean.TryGetField(Index, out var f, out var i))
                     {
+                        if(!f.NeedExport() && this.NeedExport())
+                        {
+                            throw new LubanException("error.def.table.index_not_exported", FullName, f.Name);
+                        }
                         IndexField = f;
                         IndexFieldIdIndex = i;
                     }
                     else
                     {
-                        throw new Exception($"table:'{FullName}' index:'{Index}' 字段不存在");
+                        throw new LubanException("error.def.table.index_not_exist", FullName, Index);
                     }
                 }
                 else if (ValueTType.DefBean.HierarchyFields.Count == 0)
                 {
-                    throw new Exception($"table:'{FullName}' 必须定义至少一个字段");
+                    throw new LubanException("error.def.table.no_field", FullName);
                 }
                 else
                 {
-                    IndexField = ValueTType.DefBean.HierarchyFields[0];
+                    var f = ValueTType.DefBean.HierarchyFields[0];
+
+                    if (!f.NeedExport() && this.NeedExport())
+                    {
+                        throw new LubanException("error.def.table.default_index_not_exported", FullName, f.Name);
+                    }
+                    IndexField = f;
                     Index = IndexField.Name;
                     IndexFieldIdIndex = 0;
                 }
@@ -150,7 +162,7 @@ public class DefTable : DefTypeBase
                     }
                     else
                     {
-                        throw new Exception($"table:'{FullName}' index:'{idx}' 字段不存在");
+                        throw new LubanException("error.def.table.index_not_exist", FullName, idx);
                     }
                 }
                 // 如果不是 union index, 每个key必须唯一，否则 (key1,..,key n)唯一
@@ -159,7 +171,7 @@ public class DefTable : DefTypeBase
                 break;
             }
             default:
-                throw new Exception($"unknown mode:'{Mode}'");
+                throw new LubanException("error.def.table.unknown_mode", Mode);
         }
 
         foreach (var index in IndexList)
@@ -168,11 +180,11 @@ public class DefTable : DefTypeBase
             string idxName = index.IndexField.Name;
             if (indexType.IsNullable)
             {
-                throw new Exception($"table:'{FullName}' index:'{idxName}' 不能为 nullable类型");
+                throw new LubanException("error.def.table.index_nullable", FullName, idxName);
             }
             if (!indexType.Apply(IsValidTableKeyTypeVisitor.Ins))
             {
-                throw new Exception($"table:'{FullName}' index:'{idxName}' 的类型:'{index.IndexField.Type}' 不能作为index");
+                throw new LubanException("error.def.table.index_invalid_type", FullName, idxName, index.IndexField.Type);
             }
         }
     }
